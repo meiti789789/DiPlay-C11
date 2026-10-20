@@ -78,6 +78,7 @@ def main():
             'upstream_apk_modified': False,
             'assets': {a['name']: a['digest'] for a in assets + [bridge_assets[0], source]},
         }
+        (out / 'C11-Guide-ZH.md').write_text(Path('使用说明.md').read_text())
         (out / 'upstream.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
         (out / 'SHA256SUMS.txt').write_text(''.join(
             hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + p.name + '\n'

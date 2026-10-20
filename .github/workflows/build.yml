@@ -58,7 +58,7 @@ jobs:
           mkdir -p release
           cp app/build/outputs/apk/release/app-release.apk "release/C11-WheelBridge-${GITHUB_REF_NAME#bridge-v}.apk"
           git archive --format=zip --prefix=C11-WheelBridge/ HEAD > release/C11-WheelBridge-source.zip
-          cp 使用说明.md release/
+          cp 使用说明.md release/C11-Guide-ZH.md
           (cd release && sha256sum *.apk *.zip > SHA256SUMS.txt)
       - name: Publish physical-test prerelease
         if: startsWith(github.ref, 'refs/tags/bridge-v')

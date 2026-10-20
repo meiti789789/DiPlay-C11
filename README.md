@@ -2,7 +2,9 @@
 
 **状态：测试阶段，尚未实车验证。** 目标是补充上一首、下一首、播放/暂停，同时保留 DiPlay 上游原版的在线升级能力。音量由原车处理。
 
-本项目由独立的 **C11 Wheel Bridge 方控桥接应用** 和 GitHub Actions 发布流程组成。CarPlay 主程序来自上游，桥接通过 Android MediaSession 对接，不修改上游 APK，也不冒用原作者签名。
+**单 APK 一体版正在源码构建验证，尚未发布。** 后续以名称“DiPlay C11”的完整 APK 为目标，包含主程序与方控、使用本项目更新源。详见 [一体版说明](integrated/说明.md) 和 [参考分支研究记录](integrated/研究记录.md)。现阶段不含运行时认证身份，不能把源码检查产物当作可连接 iPhone 的安装包。旧桥接与组合包保留供历史参考，旧组合包同步改为手动触发。
+
+本项目旧版由独立的 **C11 Wheel Bridge 方控桥接应用** 和 GitHub Actions 发布流程组成。CarPlay 主程序来自上游，桥接通过 Android MediaSession 对接，不修改上游 APK，也不冒用原作者签名。
 
 ## 来源、借用与许可
 

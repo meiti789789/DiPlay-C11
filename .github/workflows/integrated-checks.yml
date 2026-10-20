@@ -1,0 +1,61 @@
+name: Check integrated DiPlay C11 source
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Select upstream release metadata
+        id: plan
+        run: python3 integrated/plan.py
+      - name: Check out exact upstream release
+        uses: actions/checkout@v4
+        with:
+          repository: shihabal3amri/DiPlay
+          ref: ${{ steps.plan.outputs.upstream_tag }}
+          path: upstream
+          persist-credentials: false
+      - name: Apply bounded C11 source adaptation
+        env:
+          C11_VERSION: ${{ steps.plan.outputs.version }}
+          C11_REVISION: ${{ steps.plan.outputs.revision }}
+        run: |
+          python3 integrated/prepare.py upstream --version "$C11_VERSION" --revision "$C11_REVISION"
+          git -C upstream add .
+          (cd upstream && python3 scripts/check_public_tree.py)
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools platforms;android-37.0 build-tools;36.0.0 ndk;28.2.13676358
+          log-accepted-android-sdk-licenses: false
+      - uses: gradle/actions/setup-gradle@v4
+      - name: All checks required by upstream AGENTS.md, no runtime identity
+        working-directory: upstream
+        run: ./gradlew :shared:testDebugUnitTest :common:testDebugUnitTest :home:testDebugUnitTest :mobile:lintDebug :home:lintDebug :maphost:lintDebug :mobile:assembleDebug :home:assembleDebug :maphost:assembleDebug --stacktrace --max-workers=2
+      - name: Reports and settings screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integrated-c11-source-checks
+          path: |
+            upstream/shared/build/reports/tests/
+            upstream/common/build/reports/tests/
+            upstream/common/build/reports/c11-ui/
+            upstream/mobile/build/reports/lint-results-debug.html
+            upstream/samples/home/build/reports/tests/
+            upstream/samples/home/build/reports/lint-results-debug.html
+            upstream/samples/maphost/build/reports/lint-results-debug.html

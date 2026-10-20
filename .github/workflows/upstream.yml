@@ -1,7 +1,5 @@
 name: Track upstream DiPlay releases
 on:
-  schedule:
-    - cron: '23 */6 * * *'
   workflow_dispatch:
 permissions:
   contents: write

@@ -97,6 +97,8 @@ def main():
 - GPL-3.0 声明与其它上游许可见源码仓库。保留原作者版权，无官方合作或认证关系。
 
 这里的自动更新是仓库定时同步新发布，并非车机静默安装；未来接口变化仍可能需要更新桥接。
+
+详细安装、授权、按键测试与故障排查：[使用说明](https://github.com/{own}/blob/main/使用说明.md)。
 ''')
         subprocess.run(['gh', 'release', 'create', tag, '--repo', own, '--target', 'main',
                         '--prerelease', '--title', f'C11 组合测试包 · {release["tag_name"]} + 桥接 {version}',

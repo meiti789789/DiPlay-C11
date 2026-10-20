@@ -65,11 +65,14 @@ def prepare(target, version, revision):
         return revision(remote) > revision(installed)''')
     # Preserve all upstream tests. Add only new scenario coverage and rendered settings evidence.
     ui=target/'common/src/test/java/com/shilapi/xcertplay/AdaptiveSettingsUiTest.kt'
-    replace(ui,'    private fun openSettings(): DiPlayActivity', '''    @Test @Config(sdk = [29], qualifiers = "zh-rCN-w320dp-h600dp")
+    replace(ui,'    private fun openSettings(): DiPlayActivity', '''    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "zh-rCN-w320dp-h600dp")
     fun c11SettingsCompactLargeFont() = captureC11("compact-zh")
-    @Test @Config(sdk = [29], qualifiers = "en-w1000dp-h700dp")
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "en-w1000dp-h700dp")
     fun c11SettingsExpandedLargeFont() = captureC11("expanded-en")
-    @Test @Config(sdk = [29], qualifiers = "ar-ldrtl-w320dp-h600dp")
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "ar-ldrtl-w320dp-h600dp")
     fun c11SettingsArabicLargeFont() = captureC11("compact-ar")
     private fun captureC11(name: String) {
         RuntimeEnvironment.setFontScale(1.3f)
@@ -80,6 +83,7 @@ def prepare(target, version, revision):
         val title = texts(screen).first { it.text == screen.getString(R.string.settings_c11_wheel) }
         title.requestRectangleOnScreen(Rect(0, 0, title.width, title.height), true)
         layoutRoot(screen)
+        assertTrue("C11 control must be visible", title.getGlobalVisibleRect(Rect()))
         val root = screen.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
         val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
         try {

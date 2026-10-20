@@ -22,7 +22,10 @@
         }
         try {
             val screen = openSettings()
-            if (cluster) ReflectionHelpers.setField(screen, "settingsCategory", SettingsCategory.ADVANCED)
+            if (cluster) {
+                ReflectionHelpers.setField(screen, "settingsCategory", SettingsCategory.ADVANCED)
+                ReflectionHelpers.setField(screen, "settingsSectionFilter", setOf(SettingsSection.CLUSTER_MAP))
+            }
             else ReflectionHelpers.setField(screen, "page", "home")
             ReflectionHelpers.callInstanceMethod<Unit>(screen, "render")
             layoutRoot(screen)

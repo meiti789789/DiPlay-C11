@@ -81,8 +81,11 @@ def prepare(target, version, revision):
         ReflectionHelpers.callInstanceMethod<Unit>(screen, "render")
         layoutRoot(screen)
         val title = texts(screen).first { it.text == screen.getString(R.string.settings_c11_wheel) }
-        title.requestRectangleOnScreen(Rect(0, 0, title.width, title.height), true)
-        layoutRoot(screen)
+        val scroll = ReflectionHelpers.getField<ScrollView>(screen, "rootScroll")
+        val bounds = Rect()
+        title.getDrawingRect(bounds)
+        scroll.offsetDescendantRectToMyCoords(title, bounds)
+        scroll.scrollTo(0, (bounds.top - 16).coerceAtLeast(0))
         assertTrue("C11 control must be visible", title.getGlobalVisibleRect(Rect()))
         val root = screen.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
         val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)

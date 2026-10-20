@@ -6,7 +6,6 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
-import urllib.request
 
 UPSTREAM = 'shihabal3amri/DiPlay'
 

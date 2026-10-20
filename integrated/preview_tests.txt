@@ -1,0 +1,49 @@
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "zh-rCN-w320dp-h600dp")
+    fun c11ClusterCompactPreview() = captureC11Profile("cluster-compact-zh", true)
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "zh-rCN-w1000dp-h700dp")
+    fun c11ClusterWidePreview() = captureC11Profile("cluster-wide-zh", true)
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "ar-ldrtl-w320dp-h600dp")
+    fun c11ClusterRtlPreview() = captureC11Profile("cluster-compact-ar", true)
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "zh-rCN-w1000dp-h700dp")
+    fun c11HomeBrandPreview() = captureC11Profile("home-wide-zh", false)
+
+    private fun captureC11Profile(name: String, cluster: Boolean) {
+        RuntimeEnvironment.setFontScale(1.3f)
+        org.robolectric.shadows.ShadowBuild.setModel("msmnile_gvmq for arm64")
+        val manager = context.getSystemService(android.hardware.display.DisplayManager::class.java)
+        val displayId = org.robolectric.shadows.ShadowDisplayManager.addDisplay("w1920dp-h720dp-mdpi", 5)
+        shadowOf(manager.getDisplay(displayId)).apply {
+            setName("C11 instrument (simulated)")
+            setFlags(android.view.Display.FLAG_PRESENTATION)
+        }
+        try {
+            val screen = openSettings()
+            if (cluster) ReflectionHelpers.setField(screen, "settingsCategory", SettingsCategory.ADVANCED)
+            else ReflectionHelpers.setField(screen, "page", "home")
+            ReflectionHelpers.callInstanceMethod<Unit>(screen, "render")
+            layoutRoot(screen)
+            if (cluster) {
+                val title = texts(screen).first { it.text.toString().startsWith(screen.getString(R.string.settings_c11_cluster_display)) }
+                val scroll = ReflectionHelpers.getField<ScrollView>(screen, "rootScroll")
+                val bounds = Rect(); title.getDrawingRect(bounds)
+                scroll.offsetDescendantRectToMyCoords(title, bounds)
+                scroll.scrollTo(0, (bounds.top - 16).coerceAtLeast(0))
+                assertTrue(title.getGlobalVisibleRect(Rect()))
+                assertNull(C11ClusterRoute.findDisplay(context))
+                assertFalse(AdbClusterRouter.enabled(context))
+            }
+            val root = screen.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+            val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+            try {
+                root.draw(Canvas(bitmap))
+                val output = Paths.get("build/reports/c11-ui/$name.png")
+                Files.createDirectories(output.parent)
+                Files.newOutputStream(output).use { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)) }
+            } finally { bitmap.recycle() }
+        } finally { org.robolectric.shadows.ShadowDisplayManager.removeDisplay(displayId) }
+    }
+

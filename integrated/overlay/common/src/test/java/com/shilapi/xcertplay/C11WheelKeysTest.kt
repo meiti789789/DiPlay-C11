@@ -15,7 +15,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28])
+@Config(sdk = [28, 33])
 class C11WheelKeysTest {
     private val context get() = RuntimeEnvironment.getApplication()
     private fun key(value: Int) = Intent("com.leapmotor.action.METER.CTRL")

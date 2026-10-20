@@ -45,7 +45,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Render C11 settings in native graphics mode
         working-directory: upstream
-        run: ./gradlew :common:testDebugUnitTest --tests "com.shilapi.xcertplay.AdaptiveSettingsUiTest.c11Settings*" --stacktrace --max-workers=2
+        run: ./gradlew :common:testDebugUnitTest --tests "com.shilapi.xcertplay.AdaptiveSettingsUiTest.c11*" --stacktrace --max-workers=2
       - name: Reports and settings screenshots
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,0 +1,29 @@
+plugins { id 'com.android.application' }
+def bridgeVersion = new groovy.json.JsonSlurper().parse(rootProject.file('version.json'))
+android {
+    namespace 'local.c11.wheelbridge'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'local.c11.wheelbridge'
+        minSdk 25
+        targetSdk 35
+        versionCode bridgeVersion.code as int
+        versionName bridgeVersion.name
+    }
+    signingConfigs {
+        release {
+            if (System.getenv('C11_KEYSTORE')) {
+                storeFile file(System.getenv('C11_KEYSTORE'))
+                storePassword System.getenv('C11_STORE_PASSWORD')
+                keyAlias System.getenv('C11_KEY_ALIAS')
+                keyPassword System.getenv('C11_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes { release { signingConfig signingConfigs.release } }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}

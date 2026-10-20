@@ -1,0 +1,113 @@
+name: Release integrated DiPlay C11
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 */6 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: integrated-c11-release
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      needed: ${{ steps.plan.outputs.needed }}
+      tag: ${{ steps.plan.outputs.tag }}
+      upstream_tag: ${{ steps.plan.outputs.upstream_tag }}
+      version: ${{ steps.plan.outputs.version }}
+      revision: ${{ steps.plan.outputs.revision }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Plan exact upstream release
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 integrated/release_plan.py
+  build:
+    needs: plan
+    if: needs.plan.outputs.needed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      C11_UPSTREAM_TAG: ${{ needs.plan.outputs.upstream_tag }}
+      C11_VERSION: ${{ needs.plan.outputs.version }}
+      C11_REVISION: ${{ needs.plan.outputs.revision }}
+      C11_TAG: ${{ needs.plan.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check out exact upstream release
+        uses: actions/checkout@v4
+        with:
+          repository: shihabal3amri/DiPlay
+          ref: ${{ needs.plan.outputs.upstream_tag }}
+          path: upstream
+          persist-credentials: false
+      - name: Apply C11 source adaptation and reject credential files
+        run: |
+          python3 integrated/prepare.py upstream --version "$C11_VERSION" --revision "$C11_REVISION"
+          git -C upstream add .
+          (cd upstream && python3 scripts/check_public_tree.py)
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools platforms;android-37.0 build-tools;36.0.0 ndk;28.2.13676358
+          log-accepted-android-sdk-licenses: false
+      - uses: gradle/actions/setup-gradle@v4
+      - name: All checks required by upstream AGENTS.md
+        working-directory: upstream
+        run: ./gradlew :shared:testDebugUnitTest :common:testDebugUnitTest :home:testDebugUnitTest :mobile:lintDebug :home:lintDebug :maphost:lintDebug :mobile:assembleDebug :home:assembleDebug :maphost:assembleDebug --stacktrace --max-workers=2
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integrated-c11-release-checks
+          path: |
+            upstream/shared/build/reports/tests/
+            upstream/common/build/reports/tests/
+            upstream/common/build/reports/c11-ui/
+            upstream/mobile/build/reports/lint-results-debug.html
+            upstream/samples/home/build/reports/tests/
+            upstream/samples/home/build/reports/lint-results-debug.html
+            upstream/samples/maphost/build/reports/lint-results-debug.html
+      - name: Prepare owner-authorized public runtime identity
+        run: python3 integrated/auth_assets.py
+      - name: Restore our own Android signing key
+        env:
+          KEY_B64: ${{ secrets.C11_SIGNING_KEY_B64 }}
+        run: |
+          test -n "$KEY_B64"
+          umask 077
+          printf '%s' "$KEY_B64" | base64 --decode > "$RUNNER_TEMP/c11-release.p12"
+      - name: Build complete single APK
+        working-directory: upstream
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/c11-release.p12
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.C11_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: c11bridge
+          ANDROID_KEY_PASSWORD: ${{ secrets.C11_STORE_PASSWORD }}
+        run: ./gradlew :mobile:assembleRelease --max-workers=2
+      - name: Package matching source, guide and checksums
+        run: |
+          mkdir -p integrated-release
+          cp upstream/mobile/build/outputs/apk/release/*.apk "integrated-release/DiPlay-C11-${C11_VERSION}-c11.${C11_REVISION}.apk"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs integrated-release/*.apk
+          git -C upstream add .
+          (cd upstream && python3 scripts/check_public_tree.py)
+          git -C upstream -c user.name='C11 Build' -c user.email='noreply@users.noreply.github.com' commit -m 'Apply documented C11 adaptation'
+          git -C upstream archive --format=zip --prefix=DiPlay-C11/ HEAD > integrated-release/DiPlay-C11-source.zip
+          cp integrated/说明.md integrated-release/C11-Integrated-Guide-ZH.md
+          cp "$RUNNER_TEMP/c11-runtime-provenance.json" integrated-release/upstream.json
+          (cd integrated-release && sha256sum *.apk *.zip *.md upstream.json > SHA256SUMS.txt)
+      - name: Publish only after successful checks
+        run: gh release create "$C11_TAG" integrated-release/* --target "$GITHUB_SHA" --prerelease --title "DiPlay C11 一体测试版 · $C11_TAG" --notes-file integrated/说明.md

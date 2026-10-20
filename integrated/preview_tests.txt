@@ -38,6 +38,17 @@
                 assertTrue(title.getGlobalVisibleRect(Rect()))
                 assertNull(C11ClusterRoute.findDisplay(context))
                 assertFalse(AdbClusterRouter.enabled(context))
+                // Capture the C11 control itself; full-root software rendering can retain the pre-scroll frame.
+                val control = title.parent as ViewGroup
+                val controlBitmap = Bitmap.createBitmap(control.width, minOf(control.height, 1600), Bitmap.Config.ARGB_8888)
+                try {
+                    val canvas = Canvas(controlBitmap)
+                    canvas.translate(0f, -(title.top - 24).coerceAtLeast(0).toFloat())
+                    control.draw(canvas)
+                    val file = Paths.get("build/reports/c11-ui/$name-control.png")
+                    Files.createDirectories(file.parent)
+                    Files.newOutputStream(file).use { assertTrue(controlBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)) }
+                } finally { controlBitmap.recycle() }
             }
             val root = screen.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
             val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)

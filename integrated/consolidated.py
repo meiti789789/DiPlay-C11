@@ -61,6 +61,10 @@ def apply(target, replace):
         '        WheelKeyLog.note("media key $source -> CarPlay $index sent=$sent")\n        return C11WheelKeys.deliveryResult(index, sent)\n    }')
     replace(keys, '        send = ::send,', '        send = { index, source -> send(index, source); Unit },')
 
+    settings = java/'DiPlayActivity.kt'
+    replace(settings, '                                AirPlayPersistence.saveClusterMarkerXPercent(this, 50)\n                                AirPlayPersistence.saveClusterMarkerYPercent(this, 45)',
+        '                                AirPlayPersistence.saveClusterMarkerXPercent(this, if (C11ClusterRoute.platformSupported()) C11ClusterRoute.DEFAULT_MARKER_X else 50)\n                                AirPlayPersistence.saveClusterMarkerYPercent(this, if (C11ClusterRoute.platformSupported()) C11ClusterRoute.DEFAULT_MARKER_Y else 45)')
+
     # Recovery is deliberately C11-only and keeps the user's recording source unchanged.
     replace(sink, '                    telephonySourceOverride = C11MicrophoneProfile.source(appContext),', '''                    telephonySourceOverride = C11MicrophoneProfile.source(appContext),
                     recoverSilentCapture = C11MicrophoneProfile.supported(),''')

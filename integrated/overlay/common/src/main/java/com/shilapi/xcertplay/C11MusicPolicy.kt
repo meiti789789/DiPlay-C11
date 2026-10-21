@@ -9,13 +9,16 @@ internal class C11MusicPolicy {
         fun pause()
         fun play()
     }
-    private data class Entry(val player: Player, val restore: Boolean, var paused: Boolean = false, var lastPause: Long = -10000)
+    private data class Entry(val player: Player, val restore: Boolean, var paused: Boolean = false, var lastPause: Long = -10000, var lastState: Int = 0)
     private val entries = linkedMapOf<Any, Entry>()
     private var baseline = true
     fun inspect(players: List<Player>, now: Long, pause: Boolean = true) {
         players.filter { supported(it.packageName) }.forEach { player ->
             val entry = entries.getOrPut(player.id) { Entry(player, baseline && player.state == 3) }
-            if (pause && player.state == 3 && now - entry.lastPause >= 500) {
+            val state = player.state
+            val restarted = entry.lastState == 2 && (state == 3 || state == 6)
+            entry.lastState = state
+            if (pause && (state == 3 || state == 6) && (restarted || now - entry.lastPause >= 500)) {
                 try { player.pause(); entry.paused = true; entry.lastPause = now }
                 catch (_: RuntimeException) { /* Retry on a later state observation. */ }
             }

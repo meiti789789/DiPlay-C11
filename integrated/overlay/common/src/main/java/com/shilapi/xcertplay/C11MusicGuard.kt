@@ -5,6 +5,8 @@ import android.content.Context
 import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
+import android.media.session.PlaybackState
+import android.media.session.MediaSession
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -27,6 +29,42 @@ internal object C11MusicGuard {
     private var running = false
     private var lastSnapshot = "none"
     private var missingLogged = false
+    private data class Watch(val controller: MediaController, val callback: MediaController.Callback)
+    private val watches = linkedMapOf<MediaSession.Token, Watch>()
+    private var sessionManager: MediaSessionManager? = null
+    private var sessionsListener: MediaSessionManager.OnActiveSessionsChangedListener? = null
+    private val rechecks = mutableListOf<Runnable>()
+    private fun observe(c: Context, controllers: List<MediaController>) {
+        val active = controllers.map { it.sessionToken }.toSet()
+        watches.keys.filter { it !in active }.forEach { token ->
+            watches.remove(token)?.let { it.controller.unregisterCallback(it.callback) }
+        }
+        controllers.filter { C11MusicPolicy.supported(it.packageName) }.forEach { controller ->
+            if (controller.sessionToken !in watches) {
+                val expected = owner
+                val callback = object : MediaController.Callback() {
+                    override fun onPlaybackStateChanged(state: PlaybackState?) {
+                        if (running && owner === expected) scan()
+                    }
+                    override fun onSessionDestroyed() {
+                        if (running && owner === expected) scan()
+                    }
+                }
+                controller.registerCallback(callback, handler)
+                watches[controller.sessionToken] = Watch(controller, callback)
+            }
+        }
+        if (sessionsListener == null) {
+            val expected = owner
+            val listener = MediaSessionManager.OnActiveSessionsChangedListener {
+                if (running && owner === expected) scan()
+            }
+            val manager = c.getSystemService(MediaSessionManager::class.java)
+            manager.addOnActiveSessionsChangedListener(listener,
+                ComponentName(c, C11MusicAccessService::class.java), handler)
+            sessionManager = manager; sessionsListener = listener
+        }
+    }
     private fun prefs(c: Context) = c.getSharedPreferences("c11-music", Context.MODE_PRIVATE)
     fun enabled(c: Context) = prefs(c).getBoolean("enabled", false)
     fun restoreEnabled(c: Context) = prefs(c).getBoolean("restore", true)
@@ -71,11 +109,23 @@ internal object C11MusicGuard {
     }
     fun wheelEvent() {
         refresh()
-        if (running) { handler.removeCallbacks(tick); handler.post(tick) }
+        if (running) {
+            handler.removeCallbacks(tick); handler.post(tick)
+            rechecks.forEach { handler.removeCallbacks(it) }; rechecks.clear()
+            val expected = owner
+            // OEM media may start after our broadcast receiver returns. Observe that window
+            // without muting STREAM_MUSIC (which also carries CarPlay).
+            listOf(60L, 160L, 320L, 550L).forEach { delay ->
+                val task = Runnable { if (running && owner === expected) scan() }
+                rechecks += task; handler.postDelayed(task, delay)
+            }
+        }
     }
     private fun players(c: Context): List<C11MusicPolicy.Player> {
         val manager = c.getSystemService(MediaSessionManager::class.java)
-        return manager.getActiveSessions(ComponentName(c, C11MusicAccessService::class.java)).map { controller ->
+        val controllers = manager.getActiveSessions(ComponentName(c, C11MusicAccessService::class.java))
+        if (running) observe(c, controllers)
+        return controllers.map { controller ->
             object : C11MusicPolicy.Player {
                 override val id: Any get() = controller.sessionToken
                 override val packageName get() = controller.packageName
@@ -108,6 +158,10 @@ internal object C11MusicGuard {
     }
     private fun stopMonitoring(restore: Boolean) {
         running = false; handler.removeCallbacks(tick)
+        rechecks.forEach { handler.removeCallbacks(it) }; rechecks.clear()
+        sessionsListener?.let { listener -> runCatching { sessionManager?.removeOnActiveSessionsChangedListener(listener) } }
+        sessionsListener = null; sessionManager = null
+        watches.values.forEach { runCatching { it.controller.unregisterCallback(it.callback) } }; watches.clear()
         val c = context
         val mode = c?.getSystemService(AudioManager::class.java)?.mode
         // Existing iAP call state is observed locally; this getter performs no vehicle/ADB writes.
@@ -122,5 +176,5 @@ internal object C11MusicGuard {
         (audioMode == AudioManager.MODE_NORMAL || audioMode == AudioManager.MODE_IN_COMMUNICATION)
     fun diagnostic(c: Context) = "C11 music enabled=${enabled(c)} restore=${restoreEnabled(c)} access=${accessGranted(c)} " +
         "listenerConnected=${connectedService != null} session=${owner != null} monitoring=$running " +
-        "audioMode=${c.getSystemService(AudioManager::class.java)?.mode} sessions=$lastSnapshot"
+        "audioMode=${c.getSystemService(AudioManager::class.java)?.mode} callbacks=${watches.size} sessions=$lastSnapshot"
 }

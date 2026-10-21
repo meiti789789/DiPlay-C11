@@ -95,4 +95,15 @@ class C11ClusterRouteTest {
             assertTrue(attrs.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE != 0)
         } finally { presentation.dismiss() }
     }
+    @Test fun mapSizeAndMarkerSettingsReachTheSquareStreamWithoutMovingTheWindow() {
+        val content = com.shilapi.xcertplay.airplay.CarPlayClusterDisplay.Content.MAP
+        val standard = C11ClusterRoute.streamConfig(content, 100, 50, 45)
+        val larger = C11ClusterRoute.streamConfig(content, 67, 50, 45)
+        val moved = C11ClusterRoute.streamConfig(content, 100, 65, 60)
+        assertTrue(larger.widthPixels < standard.widthPixels)
+        assertEquals(larger.widthPixels, larger.heightPixels)
+        assertNotEquals(standard.safeArea, moved.safeArea)
+        assertEquals(C11ClusterRoute.Viewport(), C11ClusterRoute.plan(1920, 720, true))
+    }
+
 }

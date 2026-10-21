@@ -39,7 +39,10 @@ def apply(target,replace):
         '''            if (size.x > 0 && size.y > 0) {
                 clusterStreamOnDisplay = true
                 if (C11ClusterRoute.plan(size.x, size.y) != null) {
-                    return C11ClusterRoute.streamConfig(AirPlayPersistence.loadClusterContent(this)).also {
+                    return C11ClusterRoute.streamConfig(AirPlayPersistence.loadClusterContent(this),
+                        scalePercent = AirPlayPersistence.loadClusterMapScalePercent(this),
+                        markerXPercent = AirPlayPersistence.loadClusterMarkerXPercent(this),
+                        markerYPercent = AirPlayPersistence.loadClusterMarkerYPercent(this)).also {
                         MapMirrors.streamAspect = 1.0
                         appendLog("C11 cluster: 720x720 stream on explicitly selected ${display.displayId}:${display.name}; window=right720")
                     }

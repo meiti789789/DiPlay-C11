@@ -55,8 +55,10 @@ internal object C11ClusterRoute {
         val expectedId = prefs(context).getInt("display_id", -1)
         return candidates(context).singleOrNull { it.name == name && it.displayId == expectedId }
     }
-    fun streamConfig(content: CarPlayClusterDisplay.Content) = CarPlayClusterDisplay.config(
-        widthPixels = 720, heightPixels = 720, scalePercent = 100, content = content,
+    fun streamConfig(content: CarPlayClusterDisplay.Content, scalePercent: Int = 100,
+        markerXPercent: Int? = null, markerYPercent: Int? = null) = CarPlayClusterDisplay.config(
+        widthPixels = 720, heightPixels = 720, scalePercent = scalePercent, content = content,
+        markerXPercent = markerXPercent, markerYPercent = markerYPercent,
         baseSafeArea = CarPlayClusterDisplay.VIRTUAL_SAFE_AREA_PERCENT)
     fun configureWindow(window: Window?, display: Display) {
         val size = size(display)

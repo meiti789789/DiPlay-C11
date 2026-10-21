@@ -49,4 +49,18 @@ class C11MusicPolicyTest {
         assertFalse(C11MusicPolicy.supported("com.netease.cloudmusic.evil".replace("cloudmusic.","cloudmusicx.")))
         assertFalse(C11MusicPolicy.supported("com.leapmotor.navigation"))
     }
+    @Test fun bufferingIsPausedBeforePlaybackAndDoesNotAutoStartOnDisconnect() {
+        val policy = C11MusicPolicy(); val music = Fake(state = 6)
+        policy.inspect(listOf(music), 0)
+        assertEquals(1, music.pauses)
+        policy.finish(true); assertEquals(0, music.plays)
+    }
+    @Test fun confirmedPausedThenRestartedDoesNotWaitForRetryCooldown() {
+        val policy = C11MusicPolicy(); val music = Fake()
+        policy.inspect(listOf(music), 0)
+        policy.inspect(listOf(music), 10)
+        music.state = 3; policy.inspect(listOf(music), 60)
+        assertEquals(2, music.pauses)
+    }
+
 }

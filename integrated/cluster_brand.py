@@ -44,7 +44,7 @@ def apply(target,replace):
                         markerXPercent = AirPlayPersistence.loadClusterMarkerXPercent(this),
                         markerYPercent = AirPlayPersistence.loadClusterMarkerYPercent(this)).also {
                         MapMirrors.streamAspect = 1.0
-                        appendLog("C11 cluster: 720x720 stream on explicitly selected ${display.displayId}:${display.name}; window=right720")
+                        appendLog("C11 cluster: ${it.widthPixels}x${it.heightPixels} stream on explicitly selected ${display.displayId}:${display.name}; window=right720")
                     }
                 }''')
     replace(java/'DiPlayActivity.kt','''            getString(R.string.carplay_map_on_instrument_cluster_experimental), R.drawable.ic_dp_dashboard) { card ->''',

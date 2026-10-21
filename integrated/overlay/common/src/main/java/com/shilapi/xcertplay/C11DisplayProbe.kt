@@ -1,5 +1,6 @@
 package com.shilapi.xcertplay
 
+import com.shilapi.xcertplay.host.R
 import android.app.Presentation
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable

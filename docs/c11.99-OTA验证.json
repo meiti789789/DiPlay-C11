@@ -1,0 +1,38 @@
+{
+  "run_id": 39600798122,
+  "run_attempt": 1,
+  "source_commit": "2093c87be2040de9d130ce856465a759ff681f31",
+  "checks_artifact_id": 12347210476,
+  "checks_artifact_sha256": "eb3364e9683e259d366998e02e5ae1a6817dffc1eea75f46f43b3becab2440c1",
+  "unit_tests": {
+    "shared": {
+      "tests": 1605,
+      "failures": 0,
+      "skipped": 0
+    },
+    "common": {
+      "tests": 1550,
+      "failures": 0,
+      "skipped": 0
+    },
+    "samples/home": {
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0
+    }
+  },
+  "total_tests": 3161,
+  "car_adb_executed": false,
+  "vehicle_installation_verified": false,
+  "scope": "In-app OTA discovery, download and checksum; owner handles computer-side whitelist installation.",
+  "workflow_conclusion": "success",
+  "release_tag": "c11-v0.2.21-c11.99",
+  "legacy_api_first_tag": "c11-v0.2.21-c11.99",
+  "release_files_checksums_verified": true,
+  "package": "com.c11.diplay",
+  "version_name": "0.2.21-c11.99",
+  "version_code": 40099,
+  "signer_sha256": "d81eca4365d29a2519577fd08a41e138ff89da95840b90be25df1c0952a507af",
+  "apk_sha256": "540114d6f221a886afc012810eec652eed27da79d37264910c58c7e4a670c48c",
+  "car_in_app_discovery_download_verified": false
+}

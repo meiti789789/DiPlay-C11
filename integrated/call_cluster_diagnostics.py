@@ -18,7 +18,7 @@ def apply(target, replace):
     replace(base/'MicrophoneUplink.kt', '                    if (filled == frame.size) {',
         '                    if (filled == frame.size) {\n                        stats.inputLevel(frame) // Before the optional software echo canceller.')
     replace(base/'AndroidMediaSink.kt', '            val uplink = microphoneUplinks.computeIfAbsent(id) {', '''            val uplink = microphoneUplinks.computeIfAbsent(id) {
-                if (config.audioType == "telephony" && C11MicrophoneProfile.supported()) runCatching {
+                if (config.audioType == "telephony" && runCatching { C11MicrophoneProfile.supported() }.getOrDefault(false)) runCatching {
                     val audio = appContext?.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
                     onAudioDiagnostic("C11 call context sourceSelection=${appContext?.let(C11MicrophoneProfile::selected)} " +
                         "audioMode=${audio?.mode} systemMicMuted=${audio?.isMicrophoneMute} " +

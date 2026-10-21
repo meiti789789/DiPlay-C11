@@ -20,7 +20,7 @@ class C11WheelKeysTest {
     private val context get() = RuntimeEnvironment.getApplication()
     private fun key(value: Int) = Intent("com.leapmotor.action.METER.CTRL")
         .putExtra("keyEventType", "steeringWheel").putExtra("value", value)
-    @After fun stop() { C11WheelKeys.detach(null); C11WheelKeys.setEnabled(context, false) }
+    @After fun stop() { C11WheelKeys.detach(null); C11WheelKeys.setEnabled(context, false); C11MusicGuard.setEnabled(context, false) }
     @Test fun decodingAcceptsStringAndIntegerButRejectsOtherVehicleCommands() {
         assertEquals(C11WheelProtocol.Command.PREVIOUS, C11WheelKeys.decode(key(1)))
         assertEquals(C11WheelProtocol.Command.TOGGLE, C11WheelKeys.decode(key(3).putExtra("value", "3")))
@@ -33,7 +33,7 @@ class C11WheelKeysTest {
         assertFalse(C11WheelKeys.enabled(context))
         val delivered = mutableListOf<Int>()
         val session = mock(CarPlayController::class.java)
-        C11WheelKeys.attach(context, session) { delivered += it }
+        C11WheelKeys.attach(context, session) { delivered += it; true }
         context.sendBroadcast(key(2)); shadowOf(Looper.getMainLooper()).idle()
         assertTrue(delivered.isEmpty())
         C11WheelKeys.setEnabled(context, true)
@@ -46,9 +46,9 @@ class C11WheelKeysTest {
     @Test fun reconnectDoesNotDoubleRegisterAndOldDetachCannotStopNewSession() {
         val delivered = mutableListOf<Int>()
         val old = mock(CarPlayController::class.java); val next = mock(CarPlayController::class.java)
-        C11WheelKeys.attach(context, old) { fail("Old receiver must not dispatch") }
-        C11WheelKeys.attach(context, next) { delivered += it }
-        C11WheelKeys.attach(context, next) { fail("Repeated attach must be ignored") }
+        C11WheelKeys.attach(context, old) { fail("Old receiver must not dispatch"); false }
+        C11WheelKeys.attach(context, next) { delivered += it; true }
+        C11WheelKeys.attach(context, next) { fail("Repeated attach must be ignored"); false }
         C11WheelKeys.detach(old)
         C11WheelKeys.setEnabled(context, true)
         context.sendBroadcast(key(2)); shadowOf(Looper.getMainLooper()).idle()
@@ -56,7 +56,7 @@ class C11WheelKeysTest {
     }
     @Test fun deduplicatesBroadcastAndNativeMediaKeysAndResetsAcrossSessions() {
         val session = mock(CarPlayController::class.java)
-        C11WheelKeys.attach(context, session) {}
+        C11WheelKeys.attach(context, session) { true }
         C11WheelKeys.setEnabled(context, true)
         assertTrue(C11WheelKeys.claim(CarPlayMediaButton.PAUSE, 1000))
         assertFalse(C11WheelKeys.claim(CarPlayMediaButton.PLAY_PAUSE, 1100))
@@ -65,8 +65,38 @@ class C11WheelKeysTest {
         C11WheelKeys.setEnabled(context, false)
         assertTrue(C11WheelKeys.claim(CarPlayMediaButton.NEXT, 1252))
         C11WheelKeys.detach(session)
-        C11WheelKeys.attach(context, mock(CarPlayController::class.java)) {}
+        C11WheelKeys.attach(context, mock(CarPlayController::class.java)) { true }
         C11WheelKeys.setEnabled(context, true)
         assertTrue(C11WheelKeys.claim(CarPlayMediaButton.NEXT, 1253))
+    }
+
+    @Test fun orderedMediaKeysReachOnlyCarPlayWhenForwardedButNormalOrFailedKeysStillReachOem() {
+        var oemCount = 0
+        var sent = true
+        val oem = object : android.content.BroadcastReceiver() {
+            override fun onReceive(c: android.content.Context, intent: Intent) { oemCount++ }
+        }
+        context.registerReceiver(oem, android.content.IntentFilter("com.leapmotor.action.METER.CTRL"))
+        try {
+            val controller = mock(CarPlayController::class.java)
+            C11WheelKeys.attach(context, controller) { sent }
+            C11WheelKeys.setEnabled(context, true)
+            C11MusicGuard.setEnabled(context, true)
+            C11MusicGuard.start(context, Any())
+            context.sendOrderedBroadcast(key(2), null)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(0, oemCount)
+            context.sendBroadcast(key(2))
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(1, oemCount)
+            sent = false
+            context.sendOrderedBroadcast(key(1), null)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(2, oemCount)
+            C11WheelKeys.setEnabled(context, false)
+            context.sendOrderedBroadcast(key(2), null)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(3, oemCount)
+        } finally { context.unregisterReceiver(oem) }
     }
 }

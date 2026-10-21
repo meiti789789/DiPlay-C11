@@ -12,6 +12,9 @@ import com.shilapi.xcertplay.airplay.CarPlayClusterDisplay
 
 /** Explicitly chosen public projection display only; never routes tasks or writes vehicle state. */
 internal object C11ClusterRoute {
+    const val FADE_PERCENT = 12
+    const val DEFAULT_MARKER_X = (100 + FADE_PERCENT) / 2
+    const val DEFAULT_MARKER_Y = 50
     data class Viewport(val left: Int = 1200, val top: Int = 0, val width: Int = 720, val height: Int = 720)
     fun platformSupported(fingerprint: String = Build.FINGERPRINT, model: String = Build.MODEL): Boolean =
         "$fingerprint $model".contains("msmnile_gvmq", ignoreCase = true)
@@ -57,7 +60,15 @@ internal object C11ClusterRoute {
         markerXPercent: Int? = null, markerYPercent: Int? = null) = CarPlayClusterDisplay.config(
         widthPixels = 720, heightPixels = 720, scalePercent = scalePercent, content = content,
         markerXPercent = markerXPercent, markerYPercent = markerYPercent,
-        baseSafeArea = CarPlayClusterDisplay.VIRTUAL_SAFE_AREA_PERCENT)
+        baseSafeArea = com.shilapi.xcertplay.airplay.AirPlayInsets(top = 8, bottom = 8, left = FADE_PERCENT, right = 0)).let { config ->
+            // The visible rectangle starts after the fade. Keep its centre at the requested
+            // marker without translating/scaling/cropping the video or moving the OEM window.
+            val width = config.widthPixels
+            val fade = kotlin.math.ceil(width * FADE_PERCENT / 100.0).toInt()
+            val x = width * (markerXPercent ?: DEFAULT_MARKER_X).coerceIn(FADE_PERCENT + 5, 95) / 100
+            val half = minOf(x - fade, width - x)
+            config.copy(safeArea = config.safeArea!!.copy(left = x - half, right = width - x - half))
+        }
     fun configureWindow(window: Window?, display: Display) {
         val size = size(display)
         val viewport = plan(size.x, size.y) ?: return
@@ -73,5 +84,6 @@ internal object C11ClusterRoute {
         "selectedId=${prefs(context).getInt("display_id", -1)} candidates=${candidates(context).joinToString { "${it.displayId}:${it.name}" }}; savedAcrossBoot=${prefs(context).getInt("selection_version", 0) == 2} automaticSelection=false" +
         " viewport=right720x720 scale=${AirPlayPersistence.loadClusterMapScalePercent(context)} " +
         "marker=${AirPlayPersistence.loadClusterMarkerXPercent(context)},${AirPlayPersistence.loadClusterMarkerYPercent(context)} " +
-        "content=${AirPlayPersistence.loadClusterContent(context)}"
+        "content=${AirPlayPersistence.loadClusterContent(context)} fade=alpha-left${FADE_PERCENT}% " +
+        "source=111 independentFromMain110=true"
 }

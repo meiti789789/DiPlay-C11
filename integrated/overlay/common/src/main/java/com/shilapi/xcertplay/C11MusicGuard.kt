@@ -68,6 +68,7 @@ internal object C11MusicGuard {
     private fun prefs(c: Context) = c.getSharedPreferences("c11-music", Context.MODE_PRIVATE)
     fun enabled(c: Context) = prefs(c).getBoolean("enabled", false)
     fun restoreEnabled(c: Context) = prefs(c).getBoolean("restore", true)
+    fun interceptsKeys(c: Context) = enabled(c) && owner != null
     fun accessGranted(c: Context) = NotificationManagerCompat.getEnabledListenerPackages(c).contains(c.packageName)
     fun setEnabled(c: Context, value: Boolean) {
         prefs(c).edit().putBoolean("enabled", value).apply()
@@ -105,11 +106,23 @@ internal object C11MusicGuard {
             if (!missingLogged) WheelKeyLog.note("C11 music waiting for notification access/listener connection")
             missingLogged = true; return
         }
-        if (!running) { running = true; missingLogged = false; handler.post(tick) }
+        if (!running) {
+            running = true; missingLogged = false
+            // Snapshot the previous music before taking Android media focus.
+            val expected = owner
+            handler.post {
+                if (running && owner === expected) {
+                    scan()
+                    if (running) CarPlayMediaKeys.holdC11Session()
+                }
+            }
+            handler.post(tick)
+        }
     }
     fun wheelEvent() {
         refresh()
         if (running) {
+            if (Looper.myLooper() == Looper.getMainLooper()) scan()
             handler.removeCallbacks(tick); handler.post(tick)
             rechecks.forEach { handler.removeCallbacks(it) }; rechecks.clear()
             val expected = owner

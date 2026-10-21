@@ -105,6 +105,20 @@ class C11ClusterRouteTest {
         assertEquals(C11ClusterRoute.Viewport(), C11ClusterRoute.plan(1920, 720, true))
     }
 
+    @Test fun c11DefaultsCenterTheMarkerInTheUnfadedSafeAreaAndPreserveExplicitPreferences() {
+        c11()
+        assertEquals(56, AirPlayPersistence.loadClusterMarkerXPercent(context))
+        assertEquals(50, AirPlayPersistence.loadClusterMarkerYPercent(context))
+        val config = C11ClusterRoute.streamConfig(com.shilapi.xcertplay.airplay.CarPlayClusterDisplay.Content.INSTRUMENTS)
+        val area = config.safeArea!!
+        assertTrue(area.left >= 87)
+        assertEquals(56.0, (area.left + config.widthPixels - area.right) * 50.0 / config.widthPixels, 0.2)
+        AirPlayPersistence.saveClusterMarkerXPercent(context, 50)
+        AirPlayPersistence.saveClusterMarkerYPercent(context, 45)
+        assertEquals(50, AirPlayPersistence.loadClusterMarkerXPercent(context))
+        assertEquals(45, AirPlayPersistence.loadClusterMarkerYPercent(context))
+    }
+
     @Test fun oldTemporaryChoicesAndChangedFirmwareAreNotSilentlyMigrated() {
         c11(); val panel = display("instrument")
         C11ClusterRoute.select(context, panel.name, panel.displayId)

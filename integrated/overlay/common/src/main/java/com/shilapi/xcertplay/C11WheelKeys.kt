@@ -17,17 +17,19 @@ internal object C11WheelKeys {
     private var receiver: BroadcastReceiver? = null
     private var lastButton = -1
     private var lastAt = -1L
+    private var lastDeliverySucceeded = false
     private fun prefs(context: Context) = context.getSharedPreferences("c11-wheel", Context.MODE_PRIVATE)
     fun enabled(context: Context) = prefs(context).getBoolean("enabled", false)
     fun setEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean("enabled", enabled).apply()
         lastButton = -1
         lastAt = -1L
+        lastDeliverySucceeded = false
         WheelKeyLog.note("C11 forwarding enabled=$enabled")
     }
 
     fun attach(context: Context, next: CarPlayController,
-        forward: (Int) -> Unit = CarPlayMediaKeys::onC11MediaKey) {
+        forward: (Int) -> Boolean = CarPlayMediaKeys::onC11MediaKey) {
         if (controller === next && receiver != null) return
         detach(null)
         val app = context.applicationContext
@@ -44,7 +46,7 @@ internal object C11WheelKeys {
                     } else if (C11WheelProtocol.isExtra(intent.action)) {
                         " switch=${safe(intent.extras?.get("ICU_MediaSwitch"))} key=${safe(intent.extras?.get("ICU_MediaKey"))}"
                     } else ""
-                    WheelKeyLog.note("C11 ${intent.action}$detail -> ${command ?: "unmatched"}; enabled=${enabled(app)}")
+                    WheelKeyLog.note("C11 ${intent.action}$detail -> ${command ?: "unmatched"}; enabled=${enabled(app)} ordered=$isOrderedBroadcast")
                     if (!enabled(app)) return
                     val index = when (command) {
                         C11WheelProtocol.Command.NEXT -> CarPlayMediaButton.NEXT
@@ -53,7 +55,12 @@ internal object C11WheelKeys {
                         else -> return
                     }
                     C11MusicGuard.wheelEvent()
-                    forward(index)
+                    val sent = forward(index)
+                    // Only ordered broadcasts can be consumed before downstream OEM players.
+                    if (sent && isOrderedBroadcast && C11MusicGuard.interceptsKeys(app)) {
+                        abortBroadcast()
+                        WheelKeyLog.note("C11 ordered media key consumed after forwarding")
+                    }
                 }.onFailure { WheelKeyLog.note("C11 ignored malformed broadcast: ${it.javaClass.simpleName}") }
             }
         }
@@ -61,7 +68,7 @@ internal object C11WheelKeys {
         val result = runCatching {
             // OEM multimedia services run under different UIDs. Accept only the exact media action list.
             ContextCompat.registerReceiver(app, created,
-                IntentFilter().apply { C11WheelProtocol.ACTIONS.forEach(::addAction) },
+                IntentFilter().apply { priority = 999; C11WheelProtocol.ACTIONS.forEach(::addAction) },
                 ContextCompat.RECEIVER_EXPORTED)
         }
         if (result.isFailure) {
@@ -80,6 +87,7 @@ internal object C11WheelKeys {
         context = null
         lastButton = -1
         lastAt = -1L
+        lastDeliverySucceeded = false
     }
 
     /** Shared by native media callbacks and C11 broadcasts, only while the opt-in is enabled. */
@@ -97,8 +105,19 @@ internal object C11WheelKeys {
         }
         lastButton = normalized
         lastAt = now
+        lastDeliverySucceeded = false
         return true
     }
+
+    fun deliveryResult(index: Int, sent: Boolean): Boolean {
+        val button = when (index) {
+            CarPlayMediaButton.PLAY, CarPlayMediaButton.PAUSE -> CarPlayMediaButton.PLAY_PAUSE
+            else -> index
+        }
+        if (button == lastButton) lastDeliverySucceeded = sent
+        return sent
+    }
+    fun duplicateWasDelivered(): Boolean = lastDeliverySucceeded
 
     private fun safe(value: Any?): String = when (value) {
         null -> "missing"

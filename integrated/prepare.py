@@ -112,6 +112,8 @@ def prepare(target, version, revision):
     apply_call_cluster_diagnostics(target, replace)
     from update_order import apply as apply_update_order
     apply_update_order(target, replace)
+    from consolidated import apply as apply_consolidated
+    apply_consolidated(target, replace)
     (target/'C11-ADAPTATION.md').write_text((ROOT/'说明.md').read_text())
     print(f'Prepared integrated C11 {version}-c11.{revision}; source anchors checked, keys excluded.')
 

@@ -108,6 +108,8 @@ def prepare(target, version, revision):
     apply_display_probe(target, replace)
     from call_profile import apply as apply_call_profile
     apply_call_profile(target, replace)
+    from call_cluster_diagnostics import apply as apply_call_cluster_diagnostics
+    apply_call_cluster_diagnostics(target, replace)
     (target/'C11-ADAPTATION.md').write_text((ROOT/'说明.md').read_text())
     print(f'Prepared integrated C11 {version}-c11.{revision}; source anchors checked, keys excluded.')
 

@@ -70,5 +70,8 @@ internal object C11ClusterRoute {
         window.attributes = window.attributes.apply { x = 0; y = 0 }
     }
     fun diagnostic(context: Context) = "C11 cluster platform=${platformSupported()} selected=${selection(context) ?: "none"} " +
-        "selectedId=${prefs(context).getInt("display_id", -1)} candidates=${candidates(context).joinToString { "${it.displayId}:${it.name}" }}; savedAcrossBoot=${prefs(context).getInt("selection_version", 0) == 2} automaticSelection=false"
+        "selectedId=${prefs(context).getInt("display_id", -1)} candidates=${candidates(context).joinToString { "${it.displayId}:${it.name}" }}; savedAcrossBoot=${prefs(context).getInt("selection_version", 0) == 2} automaticSelection=false" +
+        " viewport=right720x720 scale=${AirPlayPersistence.loadClusterMapScalePercent(context)} " +
+        "marker=${AirPlayPersistence.loadClusterMarkerXPercent(context)},${AirPlayPersistence.loadClusterMarkerYPercent(context)} " +
+        "content=${AirPlayPersistence.loadClusterContent(context)}"
 }

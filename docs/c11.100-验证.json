@@ -1,0 +1,50 @@
+{
+  "run_id": 39609471773,
+  "run_attempt": 1,
+  "source_commit": "e02e4f9b2d9eeda193bacf6f7a94afb8d06687b3",
+  "baseline_commit": "f3d2c91",
+  "checks_artifact_id": 12350312476,
+  "checks_artifact_sha256": "d49355e7d639e6a9489ec00b01598efa63330e2c8c6cfff80aa1486ade71a57e",
+  "unit_tests": {
+    "shared": {
+      "tests": 1608,
+      "failures": 0,
+      "skipped": 0
+    },
+    "common": {
+      "tests": 1555,
+      "failures": 0,
+      "skipped": 0
+    },
+    "samples/home": {
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0
+    }
+  },
+  "total_tests": 3169,
+  "car_adb_executed": false,
+  "vehicle_validation_complete": false,
+  "all_vehicle_issues_resolved": false,
+  "map_perspectives_synchronized": false,
+  "cancelled_superseded_runs": [
+    39608637347,
+    39608825260
+  ],
+  "known_limits": [
+    "No verified full-route/follow mode command and status feedback between independent iPhone streams 110/111.",
+    "Ordinary OEM broadcasts and direct OEM player launches cannot be aborted by the ordered-broadcast handler.",
+    "Recorder effects/restart recovery does not guarantee recovery from system routing, competing capture or iPhone Bluetooth routing."
+  ],
+  "release_tag": "c11-v0.2.21-c11.100",
+  "package": "com.c11.diplay",
+  "version_name": "0.2.21-c11.100",
+  "version_code": 40100,
+  "apk_sha256": "b090b59dea5a1303a94c350842de1145d8fb27a45cac4cc66a0a4a28362e0f03",
+  "signer_sha256": "d81eca4365d29a2519577fd08a41e138ff89da95840b90be25df1c0952a507af",
+  "signature_verified_for_api28": true,
+  "published_files_checksums_verified": true,
+  "observed_legacy_first_release": "c11-v0.2.21-c11.99",
+  "observed_numeric_newest_release": "c11-v0.2.21-c11.100",
+  "car_in_app_download_verified": false
+}

@@ -117,4 +117,25 @@ class C11ClusterRouteTest {
         assertNull(C11ClusterRoute.findDisplay(context))
     }
 
+    @Test fun instrumentWindowWaitsForARealFrameAndReturnsToStockOnDisconnect() {
+        c11(); val panel = display("instrument")
+        val presentation = ClusterMapPresentation(context, panel) {}
+        try {
+            presentation.show()
+            assertEquals(0f, presentation.window!!.attributes.alpha, 0f)
+            presentation.setStreamActive(true)
+            assertEquals(0f, presentation.window!!.attributes.alpha, 0f)
+            presentation.onC11FrameUpdated()
+            assertEquals(1f, presentation.window!!.attributes.alpha, 0f)
+            presentation.setMapVisible(false)
+            assertEquals(0f, presentation.window!!.attributes.alpha, 0f)
+            presentation.setMapVisible(true)
+            assertEquals(1f, presentation.window!!.attributes.alpha, 0f)
+            presentation.setStreamActive(false)
+            assertEquals(0f, presentation.window!!.attributes.alpha, 0f)
+            presentation.setStreamActive(true)
+            assertEquals(0f, presentation.window!!.attributes.alpha, 0f)
+        } finally { presentation.dismiss() }
+    }
+
 }

@@ -102,6 +102,8 @@ def prepare(target, version, revision):
     apply_music_guard(target, replace)
     from cluster_brand import apply as apply_cluster_brand
     apply_cluster_brand(target, replace)
+    from cluster_visibility import apply as apply_cluster_visibility
+    apply_cluster_visibility(target, replace)
     from display_probe import apply as apply_display_probe
     apply_display_probe(target, replace)
     from call_profile import apply as apply_call_profile

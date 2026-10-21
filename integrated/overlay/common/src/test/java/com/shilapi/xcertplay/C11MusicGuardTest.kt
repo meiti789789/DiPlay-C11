@@ -20,6 +20,14 @@ class C11MusicGuardTest {
         C11MusicGuard.stop(owner)
         assertTrue(C11MusicGuard.diagnostic(context).contains("session=false"))
     }
+    @Test fun staleCommunicationModeAllowsRestorationButAnActualCallDoesNot() {
+        assertTrue(C11MusicGuard.restorationAllowed(android.media.AudioManager.MODE_NORMAL,false))
+        assertTrue(C11MusicGuard.restorationAllowed(android.media.AudioManager.MODE_IN_COMMUNICATION,false))
+        assertFalse(C11MusicGuard.restorationAllowed(android.media.AudioManager.MODE_IN_COMMUNICATION,true))
+        assertFalse(C11MusicGuard.restorationAllowed(android.media.AudioManager.MODE_IN_CALL,false))
+        assertFalse(C11MusicGuard.restorationAllowed(android.media.AudioManager.MODE_RINGTONE,false))
+        assertFalse(C11MusicGuard.restorationAllowed(null,false))
+    }
     @Test fun staleSessionEndCannotStopReplacementAndRestorePreferencePersists() {
         val old=Any();val current=Any();C11MusicGuard.start(context,old);C11MusicGuard.start(context,current)
         C11MusicGuard.stop(old);assertTrue(C11MusicGuard.diagnostic(context).contains("session=true"))

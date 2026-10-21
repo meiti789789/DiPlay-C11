@@ -109,11 +109,17 @@ internal object C11MusicGuard {
     private fun stopMonitoring(restore: Boolean) {
         running = false; handler.removeCallbacks(tick)
         val c = context
+        val mode = c?.getSystemService(AudioManager::class.java)?.mode
+        // Existing iAP call state is observed locally; this getter performs no vehicle/ADB writes.
+        val callActive = com.shilapi.xcertplay.hud.BydNavigationOutputs.carPlayCall() != null
         val allowed = restore && c != null && connectedService != null && accessGranted(c) &&
-            c.getSystemService(AudioManager::class.java)?.mode == AudioManager.MODE_NORMAL
+            restorationAllowed(mode, callActive)
+        if (restore) WheelKeyLog.note("C11 music restore decision allowed=$allowed audioMode=$mode carPlayCall=$callActive")
         val activeIds = if (allowed && c != null) runCatching { players(c).map { it.id }.toSet() }.getOrNull() else null
         policy.finish(allowed && activeIds != null, activeIds); policy = C11MusicPolicy(); lastSnapshot = "none"
     }
+    internal fun restorationAllowed(audioMode: Int?, carPlayCall: Boolean): Boolean = !carPlayCall &&
+        (audioMode == AudioManager.MODE_NORMAL || audioMode == AudioManager.MODE_IN_COMMUNICATION)
     fun diagnostic(c: Context) = "C11 music enabled=${enabled(c)} restore=${restoreEnabled(c)} access=${accessGranted(c)} " +
         "listenerConnected=${connectedService != null} session=${owner != null} monitoring=$running " +
         "audioMode=${c.getSystemService(AudioManager::class.java)?.mode} sessions=$lastSnapshot"

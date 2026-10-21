@@ -46,6 +46,9 @@ def apply(target, replace):
     internal fun holdC11Session() {
         val context = appContext ?: return
         if (!C11ClusterRoute.platformSupported() || controller == null) return
+        val mode = context.getSystemService(AudioManager::class.java)?.mode
+        if (com.shilapi.xcertplay.hud.BydNavigationOutputs.carPlayCall() != null ||
+            mode == AudioManager.MODE_IN_CALL || mode == AudioManager.MODE_RINGTONE) return
         if (session == null) { start(context); publishPlaybackStateLocked() }
     }
 

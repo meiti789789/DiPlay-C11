@@ -22,7 +22,8 @@ def apply(target, replace):
                     val audio = appContext?.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
                     onAudioDiagnostic("C11 call context sourceSelection=${appContext?.let(C11MicrophoneProfile::selected)} " +
                         "audioMode=${audio?.mode} systemMicMuted=${audio?.isMicrophoneMute} " +
-                        "softwareEchoRequested=$callEchoCancellation carPhoneAudio=${PhoneAudioRoute.carPlayCallsUseCarAudio()}")
+                        "softwareEchoRequested=$callEchoCancellation carPhoneAudio=${PhoneAudioRoute.carPlayCallsUseCarAudio()} " +
+                        "musicGuardEnabled=${appContext?.getSharedPreferences("c11-music", Context.MODE_PRIVATE)?.getBoolean("enabled", false)}")
                 }''')
 
     engine = target/'shared/src/main/java/com/shilapi/xcertplay/airplay/CarPlayMediaEngine.kt'

@@ -59,13 +59,12 @@ class C11ClusterRouteTest {
         assertEquals(second.displayId,C11ClusterRoute.findDisplay(context)?.displayId)
         C11ClusterRoute.select(context,"removed");assertNull(C11ClusterRoute.findDisplay(context))
     }
-    @Test fun rebootOrTopologyChangeRequiresFreshManualConfirmation() {
+    @Test fun rebootKeepsConfirmedChoiceButTopologyChangeRequiresFreshConfirmation() {
         c11();android.provider.Settings.Global.putInt(context.contentResolver, android.provider.Settings.Global.BOOT_COUNT, 40)
         val first=display("instrument");C11ClusterRoute.select(context,first.name,first.displayId)
         assertNotNull(C11ClusterRoute.findDisplay(context))
         android.provider.Settings.Global.putInt(context.contentResolver, android.provider.Settings.Global.BOOT_COUNT, 41)
-        assertNull(C11ClusterRoute.findDisplay(context))
-        C11ClusterRoute.select(context,first.name,first.displayId);assertNotNull(C11ClusterRoute.findDisplay(context))
+        assertEquals(first.displayId,C11ClusterRoute.findDisplay(context)?.displayId)
         display("passenger");assertNull(C11ClusterRoute.findDisplay(context))
     }
     @Test fun identificationBadgeIsSmallAndCannotTakeInputOrDimThePanel() {
@@ -104,6 +103,18 @@ class C11ClusterRouteTest {
         assertEquals(larger.widthPixels, larger.heightPixels)
         assertNotEquals(standard.safeArea, moved.safeArea)
         assertEquals(C11ClusterRoute.Viewport(), C11ClusterRoute.plan(1920, 720, true))
+    }
+
+    @Test fun oldTemporaryChoicesAndChangedFirmwareAreNotSilentlyMigrated() {
+        c11(); val panel = display("instrument")
+        C11ClusterRoute.select(context, panel.name, panel.displayId)
+        val prefs = context.getSharedPreferences("c11-cluster", android.content.Context.MODE_PRIVATE)
+        prefs.edit().remove("selection_version").apply()
+        assertNull(C11ClusterRoute.findDisplay(context))
+        C11ClusterRoute.select(context, panel.name, panel.displayId)
+        assertEquals(panel.displayId, C11ClusterRoute.findDisplay(context)?.displayId)
+        prefs.edit().putString("firmware", "previous-firmware").apply()
+        assertNull(C11ClusterRoute.findDisplay(context))
     }
 
 }

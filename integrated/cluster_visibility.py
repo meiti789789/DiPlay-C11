@@ -1,8 +1,6 @@
 """Keep the C11 instrument transparent until a decoded texture frame arrives."""
 def apply(target, replace):
     path = target/'common/src/main/java/com/shilapi/xcertplay/ClusterMapPresentation.kt'
-    replace(path, '        val root = FrameLayout(context).apply {',
-        '        val root = (if (c11 != null) C11ClusterMapFrame(context) else FrameLayout(context)).apply {')
     replace(path, '    private var streamActive = false', '''    private var streamActive = false
     private val c11FrameGate = C11ClusterFrameGate()
     private fun c11Output() = C11ClusterRoute.plan(sizeOf(display).x, sizeOf(display).y) != null

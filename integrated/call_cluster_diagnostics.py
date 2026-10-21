@@ -24,3 +24,7 @@ def apply(target, replace):
                         "audioMode=${audio?.mode} systemMicMuted=${audio?.isMicrophoneMute} " +
                         "softwareEchoRequested=$callEchoCancellation carPhoneAudio=${PhoneAudioRoute.carPlayCallsUseCarAudio()}")
                 }''')
+
+    engine = target/'shared/src/main/java/com/shilapi/xcertplay/airplay/CarPlayMediaEngine.kt'
+    replace(engine, '            session.logDebug("Video: $it")',
+        '            session.logDebug("Video: $it")\n            if (it.startsWith("output format")) session.logDebug("Video stream=$type: $it")')

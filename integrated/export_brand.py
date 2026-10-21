@@ -32,10 +32,10 @@ def draw_path(ctx,data):
   elif command=='C':curve(ctx,*values);x,y=values[-2:]
  fill(ctx)
 
-def render():
+def render(size=256, output_dir=None):
  a='{http://schemas.android.com/apk/res/android}'
  root=ET.parse(ROOT/'overlay/common/src/main/res/drawable/ic_carplay.xml').getroot()
- surface=surface_create(0,256,256);ctx=create(surface);scale(ctx,256/108,256/108)
+ surface=surface_create(0,size,size);ctx=create(surface);scale(ctx,size/108,size/108)
  def node(e):
   save(ctx)
   if e.tag=='group':
@@ -49,11 +49,11 @@ def render():
   restore(ctx)
  try:
   node(root)
-  out=ROOT/'overlay/common/src/main/res/raw';out.mkdir(parents=True,exist_ok=True)
+  out=Path(output_dir) if output_dir else ROOT/'overlay/common/src/main/res/raw';out.mkdir(parents=True,exist_ok=True)
   for name in ['ic_car_home.png','placeholder_icon.png']:
    path=out/name
    if write(surface,str(path).encode())!=0:raise RuntimeError('Cairo PNG export failed')
-  print('Rendered both 256x256 PNG assets from the official-path vector.')
+  print(f'Rendered both {size}x{size} PNG assets from the official-path vector.')
  finally:destroy(ctx);destroy_surface(surface)
 
 if __name__=='__main__':render()

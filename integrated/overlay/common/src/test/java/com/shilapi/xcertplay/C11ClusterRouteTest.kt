@@ -75,7 +75,7 @@ class C11ClusterRouteTest {
             presentation.show();C11DisplayProbe.configure(presentation.window)
             val attrs=presentation.window!!.attributes
             assertEquals(140,attrs.width);assertEquals(40,attrs.height)
-            assertEquals(Gravity.BOTTOM or Gravity.RIGHT,attrs.gravity)
+            assertEquals(Gravity.TOP or Gravity.RIGHT,attrs.gravity)
             assertEquals(0,attrs.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             assertTrue(attrs.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE != 0)
             assertTrue(attrs.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE != 0)

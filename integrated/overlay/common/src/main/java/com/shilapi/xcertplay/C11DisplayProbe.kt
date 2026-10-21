@@ -24,7 +24,7 @@ internal object C11DisplayProbe {
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-        window.setGravity(Gravity.BOTTOM or Gravity.RIGHT)
+        window.setGravity(Gravity.TOP or Gravity.RIGHT)
         window.setLayout(140, 40)
     }
     fun show(activity: ComponentActivity, display: Display, confirmed: () -> Unit) {
@@ -49,6 +49,7 @@ internal object C11DisplayProbe {
             runCatching { presentation.dismiss() }
             Toast.makeText(activity, R.string.settings_c11_probe_failed, Toast.LENGTH_LONG).show(); return
         }
+        WheelKeyLog.note("C11 display marker show returned id=${display.displayId} size=140x40 gravity=top-right; physicalVisibility=unconfirmed")
         val handler = Handler(Looper.getMainLooper())
         val hide = Runnable { runCatching { presentation.dismiss() } }
         handler.postDelayed(hide, 4000)

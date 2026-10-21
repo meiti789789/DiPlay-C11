@@ -98,9 +98,9 @@ internal object C11MusicGuard {
             val players = players(c)
             val snapshot = players.joinToString { "${it.packageName}:${it.state}:supported=${C11MusicPolicy.supported(it.packageName)}" }
             if (snapshot != lastSnapshot) { lastSnapshot = snapshot; WheelKeyLog.note("C11 music sessions=${snapshot.ifEmpty { "none" }}") }
-            // Calls retain priority. Do not issue transport commands while the device is in a call.
-            val normal = c.getSystemService(AudioManager::class.java)?.mode == AudioManager.MODE_NORMAL
-            policy.inspect(players, SystemClock.elapsedRealtime(), pause = normal)
+            // C11 firmware may retain MODE_IN_COMMUNICATION after a call. Only allowlisted
+            // music sessions receive PAUSE; call/navigation sessions are never targeted.
+            policy.inspect(players, SystemClock.elapsedRealtime())
         } catch (e: RuntimeException) {
             WheelKeyLog.note("C11 music session access failed: ${e.javaClass.simpleName}")
             stopMonitoring(false)
@@ -115,5 +115,6 @@ internal object C11MusicGuard {
         policy.finish(allowed && activeIds != null, activeIds); policy = C11MusicPolicy(); lastSnapshot = "none"
     }
     fun diagnostic(c: Context) = "C11 music enabled=${enabled(c)} restore=${restoreEnabled(c)} access=${accessGranted(c)} " +
-        "listenerConnected=${connectedService != null} session=${owner != null} monitoring=$running sessions=$lastSnapshot"
+        "listenerConnected=${connectedService != null} session=${owner != null} monitoring=$running " +
+        "audioMode=${c.getSystemService(AudioManager::class.java)?.mode} sessions=$lastSnapshot"
 }

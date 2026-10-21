@@ -98,6 +98,8 @@ def prepare(target, version, revision):
     }
 
     private fun openSettings(): DiPlayActivity''')
+    from music_guard import apply as apply_music_guard
+    apply_music_guard(target, replace)
     from cluster_brand import apply as apply_cluster_brand
     apply_cluster_brand(target, replace)
     (target/'C11-ADAPTATION.md').write_text((ROOT/'说明.md').read_text())

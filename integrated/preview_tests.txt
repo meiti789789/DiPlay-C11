@@ -11,6 +11,34 @@
     @Config(sdk = [29], qualifiers = "zh-rCN-w1000dp-h700dp")
     fun c11HomeBrandPreview() = captureC11Profile("home-wide-zh", false)
 
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "zh-rCN-w320dp-h600dp")
+    fun c11MusicCompactPreview() = captureC11Music("music-compact-zh")
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "zh-rCN-w1000dp-h700dp")
+    fun c11MusicWidePreview() = captureC11Music("music-wide-zh")
+    @Test @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(sdk = [29], qualifiers = "ar-ldrtl-w320dp-h600dp")
+    fun c11MusicRtlPreview() = captureC11Music("music-compact-ar")
+    private fun captureC11Music(name: String) {
+        RuntimeEnvironment.setFontScale(1.3f)
+        val screen = openSettings()
+        ReflectionHelpers.setField(screen, "settingsCategory", SettingsCategory.VEHICLE)
+        ReflectionHelpers.callInstanceMethod<Unit>(screen, "render")
+        layoutRoot(screen)
+        val title = texts(screen).first { it.text == screen.getString(R.string.settings_c11_music_guard) }
+        val control = generateSequence(title.parent as ViewGroup) { it.parent as? ViewGroup }
+            .first { group -> descendants(group).any { it is TextView && it.text == screen.getString(R.string.settings_c11_music_access) } }
+        assertFalse(C11MusicGuard.enabled(context))
+        val bitmap = Bitmap.createBitmap(control.width, minOf(control.height, 1800), Bitmap.Config.ARGB_8888)
+        try {
+            control.draw(Canvas(bitmap))
+            val file = Paths.get("build/reports/c11-ui/$name.png")
+            Files.createDirectories(file.parent)
+            Files.newOutputStream(file).use { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)) }
+        } finally { bitmap.recycle() }
+    }
+
     private fun captureC11Profile(name: String, cluster: Boolean) {
         RuntimeEnvironment.setFontScale(1.3f)
         org.robolectric.shadows.ShadowBuild.setModel("msmnile_gvmq for arm64")

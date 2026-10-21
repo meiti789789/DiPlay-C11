@@ -52,6 +52,7 @@ internal object C11WheelKeys {
                         C11WheelProtocol.Command.TOGGLE -> CarPlayMediaButton.PLAY_PAUSE
                         else -> return
                     }
+                    C11MusicGuard.wheelEvent()
                     forward(index)
                 }.onFailure { WheelKeyLog.note("C11 ignored malformed broadcast: ${it.javaClass.simpleName}") }
             }
@@ -71,6 +72,7 @@ internal object C11WheelKeys {
 
     fun detach(expected: CarPlayController?) {
         if (expected != null && controller !== expected) return
+        C11MusicGuard.stopCurrent()
         val old = receiver
         receiver = null
         if (old != null) context?.let { runCatching { it.unregisterReceiver(old) } }

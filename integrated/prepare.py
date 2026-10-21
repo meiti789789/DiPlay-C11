@@ -102,6 +102,8 @@ def prepare(target, version, revision):
     apply_music_guard(target, replace)
     from cluster_brand import apply as apply_cluster_brand
     apply_cluster_brand(target, replace)
+    from display_probe import apply as apply_display_probe
+    apply_display_probe(target, replace)
     (target/'C11-ADAPTATION.md').write_text((ROOT/'说明.md').read_text())
     print(f'Prepared integrated C11 {version}-c11.{revision}; source anchors checked, keys excluded.')
 

@@ -49,16 +49,16 @@ def apply(target,replace):
             if (C11ClusterRoute.platformSupported()) {
                 val candidates = C11ClusterRoute.candidates(this)
                 val selected = C11ClusterRoute.findDisplay(this)
-                val labels = listOf(getString(R.string.settings_c11_cluster_none)) + candidates.map {
-                    "#${it.displayId} ${it.name.take(48)} (1920×720)"
+                card.addView(label(getString(R.string.settings_c11_cluster_display) + " · " +
+                    (selected?.let { "#${it.displayId} ${it.name}" } ?: getString(R.string.settings_c11_cluster_none)), 16, TEXT))
+                candidates.forEach { candidate ->
+                    card.addView(button(getString(R.string.settings_c11_probe_title, candidate.displayId) + " · " + candidate.name.take(32), false) {
+                        C11DisplayProbe.show(this, candidate) { markReconnectNeeded(); render() }
+                    }, matchButton(0, 60))
                 }
-                choice(card, getString(R.string.settings_c11_cluster_display), labels,
-                    candidates.indexOfFirst { it.displayId == selected?.displayId } + 1) { index ->
-                    val target = candidates.getOrNull(index - 1)
-                    C11ClusterRoute.select(this, target?.name, target?.displayId)
-                    markReconnectNeeded()
-                    render()
-                }
+                card.addView(button(getString(R.string.settings_c11_cluster_none), false) {
+                    C11ClusterRoute.select(this, null); markReconnectNeeded(); render()
+                }, matchButton(0, 60))
                 card.addView(label(getString(R.string.settings_c11_cluster_description), 14, MUTED))
             }''')
     replace(java/'DiPlayActivity.kt', '        // The joystick and map zoom use BYD\'s media and custom keys.',

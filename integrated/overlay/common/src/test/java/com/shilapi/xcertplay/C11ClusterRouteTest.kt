@@ -49,14 +49,37 @@ class C11ClusterRouteTest {
         C11ClusterRoute.select(context,panel.name)
         assertEquals(panel.displayId,ClusterMapPresentation.findDisplay(context)?.displayId)
     }
-    @Test fun duplicateOrDisappearingNamesDisableRouting() {
+    @Test fun sameNamesRequireExactIdAndUnchangedTopology() {
         c11();val first=display("same");val second=display("same")
-        C11ClusterRoute.select(context,"same",first.displayId);assertNull(C11ClusterRoute.findDisplay(context))
+        C11ClusterRoute.select(context,"same");assertNull(C11ClusterRoute.findDisplay(context))
+        C11ClusterRoute.select(context,"same",first.displayId);assertEquals(first.displayId,C11ClusterRoute.findDisplay(context)?.displayId)
         ShadowDisplayManager.removeDisplay(first.displayId);added.remove(first.displayId)
         assertNull(C11ClusterRoute.findDisplay(context))
         C11ClusterRoute.select(context,second.name,second.displayId)
         assertEquals(second.displayId,C11ClusterRoute.findDisplay(context)?.displayId)
         C11ClusterRoute.select(context,"removed");assertNull(C11ClusterRoute.findDisplay(context))
+    }
+    @Test fun rebootOrTopologyChangeRequiresFreshManualConfirmation() {
+        c11();android.provider.Settings.Global.putInt(context.contentResolver, android.provider.Settings.Global.BOOT_COUNT, 40)
+        val first=display("instrument");C11ClusterRoute.select(context,first.name,first.displayId)
+        assertNotNull(C11ClusterRoute.findDisplay(context))
+        android.provider.Settings.Global.putInt(context.contentResolver, android.provider.Settings.Global.BOOT_COUNT, 41)
+        assertNull(C11ClusterRoute.findDisplay(context))
+        C11ClusterRoute.select(context,first.name,first.displayId);assertNotNull(C11ClusterRoute.findDisplay(context))
+        display("passenger");assertNull(C11ClusterRoute.findDisplay(context))
+    }
+    @Test fun identificationBadgeIsSmallAndCannotTakeInputOrDimThePanel() {
+        c11();val panel=display("instrument")
+        val presentation=android.app.Presentation(context,panel)
+        try {
+            presentation.show();C11DisplayProbe.configure(presentation.window)
+            val attrs=presentation.window!!.attributes
+            assertEquals(140,attrs.width);assertEquals(40,attrs.height)
+            assertEquals(Gravity.BOTTOM or Gravity.RIGHT,attrs.gravity)
+            assertEquals(0,attrs.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            assertTrue(attrs.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE != 0)
+            assertTrue(attrs.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE != 0)
+        } finally { presentation.dismiss() }
     }
     @Test fun squareStreamAndWindowDoNotFillTheInstrumentPanel() {
         c11();val panel=display("instrument");C11ClusterRoute.select(context,panel.name)

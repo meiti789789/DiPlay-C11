@@ -1,8 +1,12 @@
 # DiPlay C11 · 2023 款零跑 C11 增程一体测试版
 
-**c11.101 实车反馈已确认仍有缺口：无声、仪表车标偏右、双屏视角不一致、左缘融合观感不均。** 此前的参数居中测试不能作为实车修复结论。
+**[c11.104 已发布：自定义转向卡最大尺寸翻倍、仪表左缘柔和融合](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.104)。**
 
-[c11.102 已发布](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.102)，修正仪表视频视图／窗口的透明合成声明，补充只读音频快照；[完整测试与构建](https://github.com/meiti789789/DiPlay-C11/actions/runs/39719285763)重跑通过后已发布正常签名 APK：3,177 项测试，0 失败、0 跳过；首轮备份服务端口测试失败证据保留。不是全部问题最终修复版。具体范围见[本版说明](integrated/说明.md)。
+车主已确认现有版本可以手动调整仪表车标居中，本版保留其设置，不恢复已取消的 c11.103 改动。C11 自定义转向卡大小上限从 95% 扩展到 190%；720×720 区域的新最大主卡为 394×148 像素，旧最大为 197×74，宽高各翻倍，文字、箭头与信息条同步放大。旧尺寸不变，更新后主动把滑块拉到 190%。左缘视频透明过渡由 12% 窄线性改为 24% 宽平滑过渡，透出实际底层，不改车标安全区、不填固定昼夜颜色、不做硬斜边裁剪。
+
+3,185 项单元测试，0 失败、0 跳过，三个应用 lint 与调试构建通过，[完整构建记录](https://github.com/meiti789789/DiPlay-C11/actions/runs/39750432698)。固定签名与 API 28 核验通过，公开 c11.9 更新接口首条为完整 c11.104。见[操作步骤](使用说明.md)、[验证记录](docs/c11.104-验证.json)。
+
+模拟渲染对比：[原 95% 最大档](docs/previews/c11.104-card-95-simulated.png)、[新 190% 最大档](docs/previews/c11.104-card-190-simulated.png)、[新滑块上限](docs/previews/c11.104-size-slider-simulated.png)。这些不是实车截图；实际融合观感仍待车主确认。原车音乐被方控启动后才暂停的问题、无声和双屏视角同步没有据此解决。
 
 <img src="docs/previews/c11.8-brand.png" width="128" height="128" alt="白底深绿色新版图标">
 
@@ -10,11 +14,11 @@
 
 c11.3 增加原车音乐互斥、断开恢复与同名仪表／副驾屏的手动标记辨认，保留明确选屏的仪表导航路径，窗口限制右侧 720×720，并将应用及 CarPlay 返回车机的默认图标／名称换成零跑。CarPlay 主程序与 C11 方控适配集成在一个应用中；不需要另装早期 18 KB 桥接。方控默认关闭，只在 CarPlay 会话期间监听，不写 CAN 或控制挡位。实车已确认 c11.2 方控转发和品牌图标有效；新增音乐互斥及仪表渲染仍待实车确认。
 
-**[最新 APK：0.2.21-c11.102](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.102)** · [c11.9 的 OTA 过渡版 c11.99](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.99) · [可用基线 c11.9](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.9) · **[详细使用说明](使用说明.md)** · **[旧参考分支研究记录](integrated/研究记录.md)**
+**[最新 APK：0.2.21-c11.104](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.104)** · [c11.9 的 OTA 过渡版 c11.99](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.99) · [可用基线 c11.9](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.9) · **[详细使用说明](使用说明.md)** · **[旧参考分支研究记录](integrated/研究记录.md)**
 
 ## 下载哪个文件
 
-- `DiPlay-C11-0.2.21-c11.102.apk`：透明配置修正及诊断补充完整 APK（其余问题仍未解决），中文安装名称为 **零跑 C11**。
+- `DiPlay-C11-0.2.21-c11.104.apk`：自定义转向卡放大与左缘柔和融合完整 APK，中文安装名称为 **零跑 C11**。
 - `DiPlay-C11-source.zip`：与安装包对应的完整已适配源码，不含 Android 签名私钥与配件身份私钥文件。
 - `C11-Integrated-Guide-ZH.md`：中文操作说明。
 - `SHA256SUMS.txt`、`upstream.json`：完整性校验与上游来源记录。

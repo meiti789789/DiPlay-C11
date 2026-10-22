@@ -1,7 +1,7 @@
 {
   "run_id": 39750432698,
   "superseded_card_only_run_cancelled": 39750190267,
-  "source_commit": "28ae54b",
+  "source_commit": "28ae54b6909e19049c88e98f7b5f84afa461cd93",
   "functional_baseline": "f3d2c91",
   "version_name": "0.2.21-c11.104",
   "version_code": 40104,
@@ -30,5 +30,26 @@
   "system_settings_written": false,
   "native_music_launch_prevented": false,
   "vehicle_appearance_confirmed": false,
-  "ci_status": "pending"
+  "ci_status": "success",
+  "run_attempt": 1,
+  "checks_artifact_id": 12414450985,
+  "checks_artifact_sha256": "ea7d7f6d7dbff7cd19ab8180201acf124bc0397d95ae8ea8caa5a4c8a5a8811e",
+  "unit_tests": {
+    "shared": 1610,
+    "common": 1569,
+    "home": 6
+  },
+  "tests_total": 3185,
+  "failures": 0,
+  "skipped": 0,
+  "three_app_lint_and_debug_builds": "passed",
+  "package": "com.c11.diplay",
+  "signer_sha256": "d81eca4365d29a2519577fd08a41e138ff89da95840b90be25df1c0952a507af",
+  "api28_signature_verified": true,
+  "published_asset_checksums_verified": true,
+  "apk_sha256": "0659acc6aed8bef41a24038e33e603b78c602072d59b99159fdf531ed1d26804",
+  "public_c11_9_update_api_first_release": "c11-v0.2.21-c11.104",
+  "ota_in_vehicle_confirmed": false,
+  "simulated_card_previews_visually_reviewed": true,
+  "owner_confirmed_existing_manual_marker_adjustment": true
 }

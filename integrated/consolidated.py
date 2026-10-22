@@ -104,6 +104,3 @@ def apply(target, replace):
 
     replace(java/'DiPlayActivity.kt', '        appendLine(C11MusicGuard.diagnostic(appContext))',
         '        appendLine(C11MusicGuard.diagnostic(appContext))\n        appendLine(C11AudioDiagnostics.report(appContext))')
-
-    import manual_marker
-    manual_marker.apply(target, replace)

@@ -104,3 +104,6 @@ def apply(target, replace):
 
     replace(java/'DiPlayActivity.kt', '        appendLine(C11MusicGuard.diagnostic(appContext))',
         '        appendLine(C11MusicGuard.diagnostic(appContext))\n        appendLine(C11AudioDiagnostics.report(appContext))')
+
+    import card_size
+    card_size.apply(target, replace)

@@ -1,0 +1,34 @@
+{
+  "run_id": 39750432698,
+  "superseded_card_only_run_cancelled": 39750190267,
+  "source_commit": "28ae54b",
+  "functional_baseline": "f3d2c91",
+  "version_name": "0.2.21-c11.104",
+  "version_code": 40104,
+  "old_max_percent": 95,
+  "new_max_percent": 190,
+  "instrument_card_size_pixels_old": [
+    197,
+    74
+  ],
+  "instrument_card_size_pixels_new": [
+    394,
+    148
+  ],
+  "legacy_30_to_95_dimensions_preserved": true,
+  "saved_marker_coordinates_unchanged": true,
+  "cancelled_c11_103_marker_changes_restored": false,
+  "blend": {
+    "width_percent": 24,
+    "alpha": "smoothstep, 17 stops",
+    "same_mask_on_all_rows": true,
+    "safe_area_percent_unchanged": 12,
+    "fixed_background_color": false,
+    "hard_diagonal_clip": false
+  },
+  "vehicle_adb_executed": false,
+  "system_settings_written": false,
+  "native_music_launch_prevented": false,
+  "vehicle_appearance_confirmed": false,
+  "ci_status": "pending"
+}

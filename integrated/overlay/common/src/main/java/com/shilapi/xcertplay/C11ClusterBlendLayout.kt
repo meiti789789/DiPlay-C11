@@ -19,13 +19,20 @@ internal class C11ClusterBlendLayout(context: Context) : FrameLayout(context) {
         val layer = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
         super.dispatchDraw(canvas)
         mask.shader = LinearGradient(0f, 0f, fadeWidth(width), 0f,
-            Color.TRANSPARENT, Color.BLACK, Shader.TileMode.CLAMP)
+            IntArray(17) { i -> Color.argb(kotlin.math.round(alphaAt(i / 16f) * 255).toInt(), 0, 0, 0) },
+            FloatArray(17) { it / 16f }, Shader.TileMode.CLAMP)
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), mask)
         canvas.restoreToCount(layer)
     }
 
     companion object {
-        // A bounded transition; the rest of the map is fully opaque. Never changes its transform.
-        fun fadeWidth(width: Int): Float = width * C11ClusterRoute.FADE_PERCENT / 100f
+        // The visual feather is independent of the phone's safe area and saved marker coordinates.
+        // Smoothstep has no slope jump where the map becomes opaque; every row shares the mask.
+        const val BLEND_WIDTH_PERCENT = 24
+        fun fadeWidth(width: Int): Float = width * BLEND_WIDTH_PERCENT / 100f
+        internal fun alphaAt(position: Float): Float {
+            val t = position.coerceIn(0f, 1f)
+            return t * t * (3f - 2f * t)
+        }
     }
 }

@@ -103,7 +103,7 @@ internal object C11ClusterRoute {
         "selectedId=${prefs(context).getInt("display_id", -1)} candidates=${candidates(context).joinToString { "${it.displayId}:${it.name}" }}; savedAcrossBoot=${prefs(context).getInt("selection_version", 0) == 2} automaticSelection=false" +
         " viewport=right720x720 scale=${AirPlayPersistence.loadClusterMapScalePercent(context)} " +
         "marker=${AirPlayPersistence.loadClusterMarkerXPercent(context)},${AirPlayPersistence.loadClusterMarkerYPercent(context)} " +
-        "content=${AirPlayPersistence.loadClusterContent(context)} fade=alpha-left${FADE_PERCENT}% " +
+        "content=${AirPlayPersistence.loadClusterContent(context)} fade=smooth-alpha-left${C11ClusterBlendLayout.BLEND_WIDTH_PERCENT}% " +
         "source=111 independentFromMain110=true centreRevision=${prefs(context).getInt("centering_revision", 0)} " +
         "previousCentre=${prefs(context).getInt("centering_original_x", -1)},${prefs(context).getInt("centering_original_y", -1)}"
 }

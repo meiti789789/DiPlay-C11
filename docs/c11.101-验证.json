@@ -1,0 +1,82 @@
+{
+  "run_id": 39706600275,
+  "source_commit": "88789abec263677593204877c3a43fb8b548be3b",
+  "upstream_tag": "v0.2.21",
+  "functional_baseline_commit": "f3d2c91",
+  "scope": "C11 selected instrument stream 111 centering; centre display stream 110 unchanged",
+  "requested_default_marker_percent": [
+    50,
+    50
+  ],
+  "legacy_default_pairs_normalized": [
+    [
+      56,
+      50
+    ],
+    [
+      50,
+      45
+    ]
+  ],
+  "window_geometry_unchanged": {
+    "left": 1200,
+    "top": 0,
+    "width": 720,
+    "height": 720
+  },
+  "runtime_source_diff_from_c11_100": [
+    "common/src/main/java/com/shilapi/xcertplay/C11ClusterRoute.kt",
+    "common/src/main/java/com/shilapi/xcertplay/CarPlayHostActivity.kt (C11 branch only)"
+  ],
+  "vehicle_adb_executed": false,
+  "system_settings_written": false,
+  "actual_iphone_marker_pixels_verified": false,
+  "vehicle_issue_confirmed_resolved": false,
+  "installed_version_during_user_photos": "not supplied",
+  "checks_artifact_id": 12394829951,
+  "checks_artifact_sha256": "caea24d4dc500aa82bb4ef8bc1ed10b56cc619c959a16afa7941df200a7238ef",
+  "unit_tests": {
+    "shared": {
+      "tests": 1608,
+      "failures": 0,
+      "skipped": 0
+    },
+    "common": {
+      "tests": 1561,
+      "failures": 0,
+      "skipped": 0
+    },
+    "samples/home": {
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0
+    }
+  },
+  "total_unit_tests": 3175,
+  "checks_run_attempt": 1,
+  "workflow_conclusion": "success",
+  "release_tag": "c11-v0.2.21-c11.101",
+  "package": "com.c11.diplay",
+  "version_name": "0.2.21-c11.101",
+  "version_code": 40101,
+  "apk_sha256": "22fdffb3e5c31abf85a4034fb1175885f7faab0f3987ddb3ff8c945422950af0",
+  "signer_sha256": "d81eca4365d29a2519577fd08a41e138ff89da95840b90be25df1c0952a507af",
+  "signature_verified_for_api28": true,
+  "published_files_checksums_verified": true,
+  "legacy_public_first_complete_release": "c11-v0.2.21-c11.101",
+  "numeric_newest_complete_release": "c11-v0.2.21-c11.101",
+  "legacy_public_api_metadata": {
+    "status": 200,
+    "date": "Thu, 22 Oct 2026 01:49:12 GMT",
+    "etag": "W/\"6535c4f76ea87ef35f1ec8e1ad6436941c9e9b8fd863a8cbdce497b18da22fdc\"",
+    "first_tag": "c11-v0.2.21-c11.101",
+    "first_assets": [
+      "C11-Integrated-Guide-ZH.md",
+      "DiPlay-C11-0.2.21-c11.101.apk",
+      "DiPlay-C11-source.zip",
+      "SHA256SUMS.txt",
+      "upstream.json"
+    ]
+  },
+  "car_in_app_discovery_and_download_verified": false
+}

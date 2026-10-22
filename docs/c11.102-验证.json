@@ -1,0 +1,30 @@
+{
+  "run_id": 39719285763,
+  "source_commit": "d7080713f0041f84b5bf57720306ede9b1249c4a",
+  "functional_baseline": "f3d2c91",
+  "vehicle_reported_version": "c11.101",
+  "scope": [
+    "instrument transparent window format",
+    "nonopaque instrument TextureView",
+    "read-only audio snapshot"
+  ],
+  "not_resolved": [
+    "CarPlay and Bluetooth music silent with advancing progress",
+    "instrument actual marker off center",
+    "110 and 111 overview/follow synchronization",
+    "actual top/bottom blend appearance"
+  ],
+  "vehicle_adb_executed": false,
+  "system_settings_written": false,
+  "first_attempt": {
+    "conclusion": "failure",
+    "artifact_id": 12400737647,
+    "artifact_sha256": "43cf47dd8b665b5d78f3d159c3d6425d60163418894e92298ca06bf58ff6def5",
+    "failed_test": "SettingsBackupServerTest.theTypedAddressKeepsItsPortFromOneOpeningToTheNext",
+    "failure": "expected reused port 32839 but got 35235 at line 299",
+    "common_tests": 1563,
+    "common_failures": 1
+  },
+  "rerun": "same source, failed build job rerun with all mandatory checks; pending",
+  "vehicle_verified": false
+}

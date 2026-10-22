@@ -19,6 +19,10 @@ def apply(target, replace):
     replace(sink, '        videoWidth,\n        videoHeight,', '''        if (type == 111) clusterVideoWidth else videoWidth,
         if (type == 111) clusterVideoHeight else videoHeight,''')
     host = java/'CarPlayHostActivity.kt'
+    replace(host, '                if (C11ClusterRoute.plan(size.x, size.y) != null) {',
+        '                if (C11ClusterRoute.plan(size.x, size.y) != null) {\n                    C11ClusterRoute.normalizeLegacyCenter(this)')
+    replace(host, '; window=right720")',
+        '; window=right720 safeArea=${it.safeArea} content=${it.initialUrl} requestedMarker=${AirPlayPersistence.loadClusterMarkerXPercent(this)},${AirPlayPersistence.loadClusterMarkerYPercent(this)}")')
     replace(host, '            videoHeight = airPlayConfig.main.heightPixels,', '''            videoHeight = airPlayConfig.main.heightPixels,
             clusterVideoWidth = airPlayConfig.cluster?.widthPixels ?: airPlayConfig.main.widthPixels,
             clusterVideoHeight = airPlayConfig.cluster?.heightPixels ?: airPlayConfig.main.heightPixels,''')

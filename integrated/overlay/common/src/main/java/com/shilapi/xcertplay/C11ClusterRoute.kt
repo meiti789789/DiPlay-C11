@@ -91,6 +91,7 @@ internal object C11ClusterRoute {
         val size = size(display)
         val viewport = plan(size.x, size.y) ?: return
         window ?: return
+        window.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
         window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)

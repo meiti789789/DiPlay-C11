@@ -29,6 +29,11 @@ class C11ClusterBlendTest {
             root.measure(spec, spec); root.layout(0, 0, 720, 720)
             val bitmap = Bitmap.createBitmap(720, 720, Bitmap.Config.ARGB_8888)
             root.draw(Canvas(bitmap))
+            // Verify identical alpha at the top and bottom, not just the middle row.
+            for (x in listOf(0, 20, 42, 85, 100, 719)) {
+                assertEquals(bitmap.getPixel(x, 2), bitmap.getPixel(x, 360))
+                assertEquals(bitmap.getPixel(x, 717), bitmap.getPixel(x, 360))
+            }
             val left = bitmap.getPixel(0, 360)
             assertTrue(kotlin.math.abs(Color.red(left) - Color.red(background)) <= 2)
             assertTrue(kotlin.math.abs(Color.blue(left) - Color.blue(background)) <= 2)

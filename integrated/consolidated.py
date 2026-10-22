@@ -10,6 +10,9 @@ def apply(target, replace):
             videoView = textureView
         } else if (plan != null)''')
 
+    replace(presentation, '            val textureView = TextureView(context)\n            textureView.surfaceTextureListener',
+        '            val textureView = TextureView(context).apply { isOpaque = false }\n            textureView.surfaceTextureListener')
+
     # Pass the requested alt-screen dimensions all the way to that decoder, including mirrors.
     sink = base/'AndroidMediaSink.kt'
     replace(sink, '    private val mtkDecoderTuningEnabled: Boolean = false,\n) : MediaSink {', '''    private val mtkDecoderTuningEnabled: Boolean = false,
@@ -98,3 +101,6 @@ def apply(target, replace):
 
     replace(sink, '"softwareEchoRequested=$callEchoCancellation carPhoneAudio=${PhoneAudioRoute.carPlayCallsUseCarAudio()}")',
         '"softwareEchoRequested=$callEchoCancellation carPhoneAudio=${PhoneAudioRoute.carPlayCallsUseCarAudio()} " +\n                        "bluetoothSco=${audio?.isBluetoothScoOn} inputs=${audio?.getDevices(AudioManager.GET_DEVICES_INPUTS)?.joinToString { \"${it.id}:${it.type}\" }}")')
+
+    replace(java/'DiPlayActivity.kt', '        appendLine(C11MusicGuard.diagnostic(appContext))',
+        '        appendLine(C11MusicGuard.diagnostic(appContext))\n        appendLine(C11AudioDiagnostics.report(appContext))')

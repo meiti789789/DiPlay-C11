@@ -89,6 +89,16 @@ class C11ClusterRouteTest {
             presentation.show()
             val attrs=presentation.window!!.attributes
             assertEquals(720,attrs.width);assertEquals(720,attrs.height)
+            assertEquals(android.graphics.PixelFormat.TRANSLUCENT, attrs.format)
+            fun textures(view: android.view.View): List<android.view.TextureView> = when (view) {
+                is android.view.TextureView -> listOf(view)
+                is android.view.ViewGroup -> (0 until view.childCount).flatMap { textures(view.getChildAt(it)) }
+                else -> emptyList()
+            }
+            val videos = textures(presentation.window!!.decorView)
+            assertEquals(1, videos.size)
+            assertFalse(videos.single().isOpaque)
+
             assertEquals(Gravity.TOP or Gravity.RIGHT,attrs.gravity)
             assertTrue(attrs.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE != 0)
             assertTrue(attrs.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE != 0)

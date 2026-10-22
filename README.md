@@ -2,7 +2,7 @@
 
 **c11.101 实车反馈已确认仍有缺口：无声、仪表车标偏右、双屏视角不一致、左缘融合观感不均。** 此前的参数居中测试不能作为实车修复结论。
 
-c11.102 修正仪表视频视图／窗口的透明合成声明，补充只读音频快照；[完整测试与构建](https://github.com/meiti789789/DiPlay-C11/actions/runs/39719285763)通过后才会发布正常签名 APK。不是全部问题最终修复版。具体范围见[本版说明](integrated/说明.md)。
+[c11.102 已发布](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.102)，修正仪表视频视图／窗口的透明合成声明，补充只读音频快照；[完整测试与构建](https://github.com/meiti789789/DiPlay-C11/actions/runs/39719285763)重跑通过后已发布正常签名 APK：3,177 项测试，0 失败、0 跳过；首轮备份服务端口测试失败证据保留。不是全部问题最终修复版。具体范围见[本版说明](integrated/说明.md)。
 
 <img src="docs/previews/c11.8-brand.png" width="128" height="128" alt="白底深绿色新版图标">
 
@@ -10,11 +10,11 @@ c11.102 修正仪表视频视图／窗口的透明合成声明，补充只读音
 
 c11.3 增加原车音乐互斥、断开恢复与同名仪表／副驾屏的手动标记辨认，保留明确选屏的仪表导航路径，窗口限制右侧 720×720，并将应用及 CarPlay 返回车机的默认图标／名称换成零跑。CarPlay 主程序与 C11 方控适配集成在一个应用中；不需要另装早期 18 KB 桥接。方控默认关闭，只在 CarPlay 会话期间监听，不写 CAN 或控制挡位。实车已确认 c11.2 方控转发和品牌图标有效；新增音乐互斥及仪表渲染仍待实车确认。
 
-**[上一版 APK：0.2.21-c11.101](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.101)** · [c11.9 的 OTA 过渡版 c11.99](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.99) · [可用基线 c11.9](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.9) · **[详细使用说明](使用说明.md)** · **[旧参考分支研究记录](integrated/研究记录.md)**
+**[最新 APK：0.2.21-c11.102](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.102)** · [c11.9 的 OTA 过渡版 c11.99](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.99) · [可用基线 c11.9](https://github.com/meiti789789/DiPlay-C11/releases/tag/c11-v0.2.21-c11.9) · **[详细使用说明](使用说明.md)** · **[旧参考分支研究记录](integrated/研究记录.md)**
 
 ## 下载哪个文件
 
-- `DiPlay-C11-0.2.21-c11.101.apk`：上一版完整 APK（实车仍偏位），中文安装名称为 **零跑 C11**。
+- `DiPlay-C11-0.2.21-c11.102.apk`：透明配置修正及诊断补充完整 APK（其余问题仍未解决），中文安装名称为 **零跑 C11**。
 - `DiPlay-C11-source.zip`：与安装包对应的完整已适配源码，不含 Android 签名私钥与配件身份私钥文件。
 - `C11-Integrated-Guide-ZH.md`：中文操作说明。
 - `SHA256SUMS.txt`、`upstream.json`：完整性校验与上游来源记录。

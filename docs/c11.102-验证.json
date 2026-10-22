@@ -25,6 +25,29 @@
     "common_tests": 1563,
     "common_failures": 1
   },
-  "rerun": "same source, failed build job rerun with all mandatory checks; pending",
-  "vehicle_verified": false
+  "rerun": {
+    "attempt": 2,
+    "conclusion": "success",
+    "checks_artifact_id": 12400709313,
+    "checks_artifact_sha256": "f9698e2657cb1960c5502781a811897ded2d4ab74ec1a645d43ab59b2ab82dcc",
+    "unit_tests": {
+      "shared": 1608,
+      "common": 1563,
+      "home": 6
+    },
+    "tests_total": 3177,
+    "failures": 0,
+    "skipped": 0,
+    "three_app_lint_and_debug_builds": "passed"
+  },
+  "vehicle_verified": false,
+  "package": "com.c11.diplay",
+  "version_name": "0.2.21-c11.102",
+  "version_code": 40102,
+  "apk_sha256": "554a82c738a22d6a69185e5ec6f24798010a6ecbd39f79a2a0cce8197ef43799",
+  "signer_sha256": "d81eca4365d29a2519577fd08a41e138ff89da95840b90be25df1c0952a507af",
+  "signature_verified_for_api28": true,
+  "published_files_checksums_verified": true,
+  "public_c11_9_update_api_first_release": "c11-v0.2.21-c11.102",
+  "ota_in_vehicle_confirmed": false
 }

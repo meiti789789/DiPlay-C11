@@ -15,5 +15,22 @@
   "real_c11_104_apk_identity_parser_verified": true,
   "same_version_code_rejected": true,
   "new_upstream_build_vehicle_tested": false,
-  "vehicle_adb_executed": false
+  "vehicle_adb_executed": false,
+  "ota_notification_source_commit": "2b68a1e",
+  "latest_automation_unit_tests": 33,
+  "ota_public_verification": {
+    "tag": "c11-v0.2.21-c11.104",
+    "numeric_latest": true,
+    "c11_9_first": true,
+    "public_download_sha256": "0659acc6aed8bef41a24038e33e603b78c602072d59b99159fdf531ed1d26804"
+  },
+  "updated_sync_trial_run": 39886314362,
+  "updated_sync_trial_result": "success; build and failure notification correctly skipped",
+  "issues_enabled": true,
+  "real_notification_test_run": 39886525625,
+  "real_notification_test_result": "success",
+  "test_issue_url": "https://github.com/meiti789789/DiPlay-C11/issues/1",
+  "test_issue_author": "github-actions[bot]",
+  "test_issue_mentions_owner": true,
+  "recipient_inbox_or_email_receipt_confirmed": false
 }

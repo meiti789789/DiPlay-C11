@@ -29,7 +29,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: python3 integrated/release_plan.py
+        run: python3 integrated/run_guarded.py python3 integrated/release_plan.py
+      - name: Collect planning failure reason
+        if: failure()
+        run: python3 integrated/report_failure.py
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: c11-sync-plan-failure
+          path: c11-failure.json
   build:
     needs: plan
     if: needs.plan.outputs.needed == 'true'
@@ -56,8 +64,8 @@ jobs:
           persist-credentials: false
       - name: Apply C11 source adaptation and reject credential files
         run: |
-          python3 integrated/prepare.py upstream --version "$C11_VERSION" --revision "$C11_REVISION"
-          python3 integrated/verify_contract.py upstream
+          python3 integrated/run_guarded.py python3 integrated/prepare.py upstream --version "$C11_VERSION" --revision "$C11_REVISION"
+          python3 integrated/run_guarded.py python3 integrated/verify_contract.py upstream
           git -C upstream add .
           (cd upstream && python3 scripts/check_public_tree.py)
       - uses: actions/setup-java@v4
@@ -106,7 +114,7 @@ jobs:
         run: |
           mkdir -p integrated-release
           cp upstream/mobile/build/outputs/apk/release/*.apk "integrated-release/DiPlay-C11-${C11_VERSION}-c11.${C11_REVISION}.apk"
-          python3 integrated/verify_apk.py
+          python3 integrated/run_guarded.py python3 integrated/verify_apk.py
           git -C upstream add .
           (cd upstream && python3 scripts/check_public_tree.py)
           git -C upstream -c user.name='C11 Build' -c user.email='noreply@users.noreply.github.com' commit -m 'Apply documented C11 adaptation'
@@ -114,10 +122,36 @@ jobs:
           cp integrated/说明.md integrated-release/C11-Integrated-Guide-ZH.md
           cp "$RUNNER_TEMP/c11-runtime-provenance.json" integrated-release/upstream.json
           (cd integrated-release && sha256sum *.apk *.zip *.md *.json > SHA256SUMS.txt)
-      - name: Explain a blocked synchronization
+      - name: Publish and verify the public OTA path
+        run: python3 integrated/run_guarded.py python3 integrated/ota_release.py
+      - name: Collect direct guard and test failure reasons
         if: failure()
-        run: |
-          echo '## C11 synchronization stopped' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Preservation, regression, build or APK identity checks failed. No new release was published; existing releases remain available. Inspect the failed step and test artifact before changing adaptation patches.' >> "$GITHUB_STEP_SUMMARY"
-      - name: Publish only after successful checks
-        run: gh release create "$C11_TAG" integrated-release/* --target "$GITHUB_SHA" --prerelease --title "DiPlay C11 一体测试版 · $C11_TAG" --notes-file integrated/说明.md
+        run: python3 integrated/report_failure.py
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: c11-sync-build-failure
+          path: c11-failure.json
+  notify_failure:
+    needs: [plan, build]
+    if: ${{ always() && (needs.plan.result == 'failure' || needs.build.result == 'failure') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: c11-sync-*-failure
+          path: failure
+          merge-multiple: true
+      - name: Notify owner with failure step and direct reason
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 integrated/notify_failure.py

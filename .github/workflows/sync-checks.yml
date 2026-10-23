@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/sync_upstream.py'
-      - 'integrated/release_plan.py'
+      - 'integrated/*.py'
       - 'integrated/verify_*.py'
       - 'integrated/protected_settings.json'
       - 'tests/**'

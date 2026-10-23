@@ -62,6 +62,14 @@ class OtaReleaseTests(unittest.TestCase):
 
 
 class FailureNotificationTests(unittest.TestCase):
+    def test_delivery_test_is_clearly_marked_and_does_not_claim_real_failure(self):
+        title, body = notify_failure.test_message('meiti789789/DiPlay-C11', 123, 1)
+        self.assertIn('通知链路测试', title)
+        self.assertIn('@meiti789789', body)
+        self.assertIn('没有发生真实同步失败', body)
+        self.assertIn('[测试示例]', body)
+        self.assertNotIn('本次 C11 自动同步／更新失败。', body)
+
     def test_failure_message_mentions_owner_with_reason_test_and_log(self):
         title, body = notify_failure.message('meiti789789/DiPlay-C11', 123, 2, [
             {'conclusion':'failure','steps':[{'name':'All checks required by upstream AGENTS.md','conclusion':'failure'}]}],

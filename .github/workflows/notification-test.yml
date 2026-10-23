@@ -1,0 +1,18 @@
+name: Test owner notification delivery
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Send clearly marked test notification through the real issue channel
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 integrated/notify_failure.py --test-notification

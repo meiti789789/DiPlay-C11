@@ -1,4 +1,5 @@
 """Notify the repository owner about failed sync attempts with bounded public diagnostics."""
+import argparse
 import json
 import os
 from pathlib import Path
@@ -43,12 +44,17 @@ def message(repo, run_id, attempt, jobs, details):
     return title, '\n'.join(lines)+'\n'
 
 
-def main():
-    repo = os.environ['GH_REPO']; run_id = int(os.environ['GITHUB_RUN_ID']); attempt = int(os.environ['GITHUB_RUN_ATTEMPT'])
-    jobs = json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/actions/runs/{run_id}/jobs?filter=latest&per_page=100']))['jobs']
-    reports = list(Path('failure').glob('**/c11-failure.json'))
-    details = json.loads(reports[0].read_text()) if reports else {}
-    title, body = message(repo, run_id, attempt, jobs, details)
+def test_message(repo, run_id, attempt):
+    _, body = message(repo, run_id, attempt,
+        [dict(conclusion='failure', steps=[dict(name='Apply C11 source adaptation and reject credential files', conclusion='failure')])],
+        dict(direct_reason='RuntimeError: [测试示例] 上游补丁锚点变化，已停止自动发布。'))
+    body = body.replace('本次 C11 自动同步／更新失败。',
+        '这是一条经你授权发送的通知链路测试。**没有发生真实同步失败，也没有改动 APK 或发布。**')
+    body = body.replace('失败步骤与说明：', '以下仅演示未来失败通知的格式：')
+    return f'[通知链路测试] C11 自动更新提醒 · #{run_id}', body
+
+
+def send(repo, title, body):
     existing = json.loads(subprocess.check_output(['gh', 'issue', 'list', '--repo', repo, '--state', 'all',
                                                   '--search', f'"{title}" in:title', '--json', 'number,title']))
     if any(issue['title'] == title for issue in existing):
@@ -56,6 +62,21 @@ def main():
     with tempfile.TemporaryDirectory() as directory:
         file = Path(directory) / 'notification.md'; file.write_text(body)
         subprocess.run(['gh', 'issue', 'create', '--repo', repo, '--title', title, '--body-file', str(file)], check=True)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--test-notification', action='store_true')
+    args = parser.parse_args()
+    repo = os.environ['GH_REPO']; run_id = int(os.environ['GITHUB_RUN_ID']); attempt = int(os.environ['GITHUB_RUN_ATTEMPT'])
+    if args.test_notification:
+        title, body = test_message(repo, run_id, attempt)
+    else:
+        jobs = json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/actions/runs/{run_id}/jobs?filter=latest&per_page=100']))['jobs']
+        reports = list(Path('failure').glob('**/c11-failure.json'))
+        details = json.loads(reports[0].read_text()) if reports else {}
+        title, body = message(repo, run_id, attempt, jobs, details)
+    send(repo, title, body)
 
 
 if __name__ == '__main__': main()

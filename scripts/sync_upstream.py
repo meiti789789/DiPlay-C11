@@ -13,8 +13,20 @@ def api(path):
     raw = subprocess.check_output(['gh', 'api', path])
     return json.loads(raw)
 
+def list_releases(repo):
+    if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repo):
+        raise ValueError('Invalid repository')
+    pages = json.loads(subprocess.check_output([
+        'gh', 'api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100']))
+    if not isinstance(pages, list) or any(not isinstance(page, list) for page in pages):
+        raise ValueError('Unexpected paginated release response')
+    return [release for page in pages for release in page]
+
 def select_release(releases):
-    for release in releases:
+    # GitHub list order follows publication metadata, not semantic version order.
+    candidates = [r for r in releases if re.fullmatch(r'v\d+\.\d+\.\d+', r.get('tag_name', ''))]
+    candidates.sort(key=lambda r: tuple(map(int, r['tag_name'][1:].split('.'))), reverse=True)
+    for release in candidates:
         if release.get('draft'):
             continue
         tag = release.get('tag_name', '')
@@ -38,7 +50,7 @@ def verify(path, digest):
 
 def main():
     own = os.environ['GH_REPO']
-    release, assets = select_release(api(f'repos/{UPSTREAM}/releases?per_page=10'))
+    release, assets = select_release(list_releases(UPSTREAM))
     version = json.loads(Path('version.json').read_text())['name']
     tag = f'c11-upstream-{release["tag_name"]}-bridge-{version}'
     # Listing avoids confusing authentication/server errors with a missing release.

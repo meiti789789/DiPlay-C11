@@ -1,0 +1,27 @@
+name: Check C11 upstream synchronization guards
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sync_upstream.py'
+      - 'integrated/release_plan.py'
+      - 'integrated/verify_*.py'
+      - 'integrated/protected_settings.json'
+      - 'tests/**'
+      - '.github/workflows/**'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test sync, preservation and OTA identity guards
+        run: python3 -m unittest discover -s tests -p 'test_*.py'

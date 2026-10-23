@@ -15,12 +15,15 @@ jobs:
       needed: ${{ steps.plan.outputs.needed }}
       tag: ${{ steps.plan.outputs.tag }}
       upstream_tag: ${{ steps.plan.outputs.upstream_tag }}
+      upstream_sha: ${{ steps.plan.outputs.upstream_sha }}
       version: ${{ steps.plan.outputs.version }}
       revision: ${{ steps.plan.outputs.revision }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Test synchronization and preservation guards
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
       - name: Plan exact upstream release
         id: plan
         env:
@@ -35,6 +38,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
+      C11_UPSTREAM_SHA: ${{ needs.plan.outputs.upstream_sha }}
       C11_UPSTREAM_TAG: ${{ needs.plan.outputs.upstream_tag }}
       C11_VERSION: ${{ needs.plan.outputs.version }}
       C11_REVISION: ${{ needs.plan.outputs.revision }}
@@ -47,12 +51,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: shihabal3amri/DiPlay
-          ref: ${{ needs.plan.outputs.upstream_tag }}
+          ref: ${{ needs.plan.outputs.upstream_sha }}
           path: upstream
           persist-credentials: false
       - name: Apply C11 source adaptation and reject credential files
         run: |
           python3 integrated/prepare.py upstream --version "$C11_VERSION" --revision "$C11_REVISION"
+          python3 integrated/verify_contract.py upstream
           git -C upstream add .
           (cd upstream && python3 scripts/check_public_tree.py)
       - uses: actions/setup-java@v4
@@ -101,13 +106,18 @@ jobs:
         run: |
           mkdir -p integrated-release
           cp upstream/mobile/build/outputs/apk/release/*.apk "integrated-release/DiPlay-C11-${C11_VERSION}-c11.${C11_REVISION}.apk"
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs integrated-release/*.apk
+          python3 integrated/verify_apk.py
           git -C upstream add .
           (cd upstream && python3 scripts/check_public_tree.py)
           git -C upstream -c user.name='C11 Build' -c user.email='noreply@users.noreply.github.com' commit -m 'Apply documented C11 adaptation'
           git -C upstream archive --format=zip --prefix=DiPlay-C11/ HEAD > integrated-release/DiPlay-C11-source.zip
           cp integrated/说明.md integrated-release/C11-Integrated-Guide-ZH.md
           cp "$RUNNER_TEMP/c11-runtime-provenance.json" integrated-release/upstream.json
-          (cd integrated-release && sha256sum *.apk *.zip *.md upstream.json > SHA256SUMS.txt)
+          (cd integrated-release && sha256sum *.apk *.zip *.md *.json > SHA256SUMS.txt)
+      - name: Explain a blocked synchronization
+        if: failure()
+        run: |
+          echo '## C11 synchronization stopped' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Preservation, regression, build or APK identity checks failed. No new release was published; existing releases remain available. Inspect the failed step and test artifact before changing adaptation patches.' >> "$GITHUB_STEP_SUMMARY"
       - name: Publish only after successful checks
         run: gh release create "$C11_TAG" integrated-release/* --target "$GITHUB_SHA" --prerelease --title "DiPlay C11 一体测试版 · $C11_TAG" --notes-file integrated/说明.md

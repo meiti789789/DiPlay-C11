@@ -1,0 +1,19 @@
+{
+  "source_commit": "39969c29b848f4d0c89b37a131d8557b320d7a08",
+  "upstream_sync_run": 39885451983,
+  "upstream_sync_run_result": "success; existing c11.104 detected, APK build skipped",
+  "automation_tests_run": 39885445252,
+  "automation_tests_result": "success",
+  "unit_tests": 24,
+  "protected_overlay_files": 32,
+  "protected_settings_keys": 115,
+  "workflow_state": "active",
+  "schedule_utc": "47 */6 * * *",
+  "upstream_release_at_verification": "v0.2.21",
+  "current_application_unchanged": "0.2.21-c11.104 / 40104",
+  "source_contract_verified_against_prepared_c11_104": true,
+  "real_c11_104_apk_identity_parser_verified": true,
+  "same_version_code_rejected": true,
+  "new_upstream_build_vehicle_tested": false,
+  "vehicle_adb_executed": false
+}

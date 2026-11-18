@@ -15,10 +15,11 @@ def apply(target, replace):
 
     # Pass the requested alt-screen dimensions all the way to that decoder, including mirrors.
     sink = base/'AndroidMediaSink.kt'
-    replace(sink, '    private val mtkDecoderTuningEnabled: Boolean = false,\n) : MediaSink {', '''    private val mtkDecoderTuningEnabled: Boolean = false,
+    tuning_anchor = '    private val mtkDecoderTuningEnabled: Boolean = false,'
+    tail = '\n    /** Opt-in (#946)' if '    navigationPromptAudioFocus: Boolean' in sink.read_text() else '\n) : MediaSink {'
+    replace(sink, tuning_anchor + tail, '''    private val mtkDecoderTuningEnabled: Boolean = false,
     private val clusterVideoWidth: Int = videoWidth,
-    private val clusterVideoHeight: Int = videoHeight,
-) : MediaSink {''')
+    private val clusterVideoHeight: Int = videoHeight,''' + tail)
     replace(sink, '        videoWidth,\n        videoHeight,', '''        if (type == 111) clusterVideoWidth else videoWidth,
         if (type == 111) clusterVideoHeight else videoHeight,''')
     host = java/'CarPlayHostActivity.kt'
@@ -33,6 +34,8 @@ def apply(target, replace):
         clusterVideoWidth: Int = videoWidth,
         clusterVideoHeight: Int = videoHeight,
         controllerGeneration:''')
+    # Preserve upstream's three-argument factory contract (including lifecycle regression tests).
+    replace(host, '    private fun createMediaSink(\n', '    private fun createMediaSink(videoWidth: Int, videoHeight: Int, controllerGeneration: Int): AndroidMediaSink =\n        createMediaSink(videoWidth, videoHeight, videoWidth, videoHeight, controllerGeneration)\n\n    private fun createMediaSink(\n')
     # The sink factory uses positional width/height; add named independent dimensions at its end.
     replace(host, '            mtkDecoderTuningEnabled = AirPlayPersistence.loadMtkDecoderTuning(this),', '''            mtkDecoderTuningEnabled = AirPlayPersistence.loadMtkDecoderTuning(this),
             clusterVideoWidth = clusterVideoWidth,

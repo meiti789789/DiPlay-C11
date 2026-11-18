@@ -25,6 +25,21 @@ def make_plan(config, upstream_releases, own_releases):
         raise ValueError('Invalid C11 revision')
     release, _ = select_release(upstream_releases)
     version = release['tag_name'][1:]
+    # The C11 counter advances across upstream versions and remains stable on daily rechecks.
+    known = []
+    for own in own_releases:
+        match = re.fullmatch(r'c11-v(\d+\.\d+\.\d+)-c11\.(\d+)', own['tag_name'])
+        if match:
+            known.append((match[1], int(match[2]), own))
+    same = [number for upstream, number, _ in known if upstream == version and number >= revision]
+    if same:
+        revision = max(same)
+    elif not any(upstream == version for upstream, _, _ in known):
+        published = [number for upstream, number, own in known if complete(own, upstream, number)]
+        if published:
+            revision = max(revision, max(published) + 1)
+    if revision > 999:
+        raise ValueError('C11 revision counter exhausted; manual version policy update required')
     tag = f'c11-v{version}-c11.{revision}'
     key = (*map(int, version.split('.')), revision)
     for own in own_releases:

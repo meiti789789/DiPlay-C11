@@ -18,15 +18,17 @@ def apply(target,replace):
         '        if (plan != null || c11 != null) {\n            window?.setBackgroundDrawable')
     replace(presentation,'        val videoParams = if (plan == null) FrameLayout.LayoutParams(-1, -1) else',
         '        val videoParams = if (c11 != null) FrameLayout.LayoutParams(c11.width, c11.height, Gravity.TOP or Gravity.LEFT)\n            else if (plan == null) FrameLayout.LayoutParams(-1, -1) else')
-    replace(presentation,'        setContentView(root)\n    }',
-        '''        setContentView(root)
-        C11ClusterRoute.configureWindow(window, display)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        C11ClusterRoute.configureWindow(window, display)
-    }''')
+    replace(presentation, '        setContentView(root)\n    }',
+        '        setContentView(root)\n        C11ClusterRoute.configureWindow(window, display)\n    }')
+    # New upstream versions own onStart for Geely projection; preserve that lifecycle work.
+    if '    override fun onStart() {' in presentation.read_text():
+        replace(presentation, '    override fun onStart() {\n        super.onStart()',
+            '    override fun onStart() {\n        super.onStart()\n        C11ClusterRoute.configureWindow(window, display)')
+    else:
+        replace(presentation, '        C11ClusterRoute.configureWindow(window, display)\n    }',
+            '        C11ClusterRoute.configureWindow(window, display)\n    }\n\n'
+            '    override fun onStart() {\n        super.onStart()\n'
+            '        C11ClusterRoute.configureWindow(window, display)\n    }')
     anchor='''        fun findDisplay(context: Context, theme: DiLink51ClusterLayout.Theme = DiLink51ClusterLayout.theme(context)): Display? {
             val displays'''
     replace(presentation,anchor,'''        fun findDisplay(context: Context, theme: DiLink51ClusterLayout.Theme = DiLink51ClusterLayout.theme(context)): Display? {

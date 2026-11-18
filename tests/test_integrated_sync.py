@@ -41,10 +41,19 @@ class SyncPlanningTests(unittest.TestCase):
     def test_current_release_is_idempotent(self):
         self.assertEqual('false', release_plan.make_plan(self.config, [release()], [own()])['needed'])
 
-    def test_new_upstream_build_retains_c11_revision(self):
+    def test_new_upstream_build_advances_c11_revision(self):
         plan = release_plan.make_plan(self.config, [release(), release('v0.2.22')], [own()])
         self.assertEqual('true', plan['needed'])
-        self.assertEqual('c11-v0.2.22-c11.104', plan['tag'])
+        self.assertEqual('c11-v0.2.22-c11.105', plan['tag'])
+
+    def test_daily_recheck_does_not_publish_another_revision(self):
+        plan = release_plan.make_plan(self.config, [release('v0.2.22')], [own('0.2.22', 105), own()])
+        self.assertEqual('false', plan['needed'])
+        self.assertEqual(105, plan['revision'])
+
+    def test_later_upstream_advances_counter_again(self):
+        plan = release_plan.make_plan(self.config, [release('v0.2.23')], [own('0.2.22', 105), own()])
+        self.assertEqual('c11-v0.2.23-c11.106', plan['tag'])
 
     def test_no_downgrade_when_upstream_temporarily_omits_a_release(self):
         self.assertEqual('false', release_plan.make_plan(self.config, [release()], [own('0.2.22')])['needed'])
@@ -58,6 +67,15 @@ class SyncPlanningTests(unittest.TestCase):
         draft = own(); draft['draft'] = True
         with self.assertRaises(ValueError): release_plan.make_plan(self.config, [release()], [draft])
 
+    def test_partial_latest_revision_is_not_bypassed(self):
+        broken = own('0.2.22', 105); broken['assets'].pop()
+        with self.assertRaisesRegex(ValueError, 'refusing to overwrite'):
+            release_plan.make_plan(self.config, [release('v0.2.22')], [broken, own()])
+
+    def test_counter_limit_fails_instead_of_reusing_a_number(self):
+        with self.assertRaisesRegex(ValueError, 'counter exhausted'):
+            release_plan.make_plan(self.config, [release('v0.2.23')], [own('0.2.22', 999)])
+
     def test_new_release_resolves_and_outputs_exact_commit(self):
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / 'output'
@@ -70,7 +88,7 @@ class SyncPlanningTests(unittest.TestCase):
 
     def test_workflow_keeps_full_checks_and_uses_immutable_commit(self):
         workflow = (ROOT / '.github/workflows/integrated.yml').read_text()
-        self.assertIn("cron: '47 */6 * * *'", workflow)
+        self.assertNotIn("  schedule:", workflow)
         self.assertIn('ref: ${{ needs.plan.outputs.upstream_sha }}', workflow)
         self.assertIn('python3 integrated/verify_contract.py upstream', workflow)
         self.assertIn('python3 integrated/verify_apk.py', workflow)

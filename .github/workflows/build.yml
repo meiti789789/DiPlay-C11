@@ -3,6 +3,17 @@ on:
   push:
     branches: [main]
     tags: ['bridge-v*']
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'version.json'
+      - 'scripts/test_protocol.py'
+      - 'tests/WheelProtocolTest.java'
+      - '.github/workflows/build.yml'
   pull_request:
   workflow_dispatch:
 permissions:

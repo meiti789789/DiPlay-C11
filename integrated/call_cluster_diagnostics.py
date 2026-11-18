@@ -12,8 +12,8 @@ def apply(target, replace):
     }
 
     fun level(pcm: ByteArray) {''')
-    replace(base/'MicrophoneCaptureStats.kt', 'peakDbfs=${peakDbfs(peakSample)} ended=$ended',
-        'inputPeakDbfs=${peakDbfs(inputPeakSample)} peakDbfs=${peakDbfs(peakSample)} ended=$ended')
+    replace(base/'MicrophoneCaptureStats.kt', 'peakDbfs=${peakDbfs(peakSample)}',
+        'inputPeakDbfs=${peakDbfs(inputPeakSample)} peakDbfs=${peakDbfs(peakSample)}')
     replace(base/'MicrophoneCaptureStats.kt', '        peakSample = 0', '        peakSample = 0\n        inputPeakSample = 0')
     replace(base/'MicrophoneUplink.kt', '                    if (filled == frame.size) {',
         '                    if (filled == frame.size) {\n                        stats.inputLevel(frame) // Before the optional software echo canceller.')

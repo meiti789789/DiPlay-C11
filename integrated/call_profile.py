@@ -6,16 +6,18 @@ def apply(target, replace):
         '    private val noAudioRestartMillis: Long = NO_AUDIO_RESTART_MILLIS,\n    private val telephonySourceOverride: Int? = null,')
     replace(base/'MicrophoneUplink.kt', '        val source = when {',
         '        val source = telephonySourceOverride?.takeIf { config.audioType == "telephony" } ?: when {')
-    replace(base/'MicrophoneUplink.kt', '        val bufferSize = maxOf(minBuffer * 2, config.frameBytes * 4)',
-        '''        stats.useSourceName(when (source) {
-            MediaRecorder.AudioSource.VOICE_RECOGNITION -> "VOICE_RECOGNITION"
-            MediaRecorder.AudioSource.VOICE_COMMUNICATION -> "VOICE_COMMUNICATION"
-            MediaRecorder.AudioSource.MIC -> "MIC"
-            else -> "DEFAULT"
-        })
-        val bufferSize = maxOf(minBuffer * 2, config.frameBytes * 4)''')
-    replace(base/'MicrophoneCaptureStats.kt', '    fun useVoiceCommunicationSource()',
-        '    fun useSourceName(source: String) { metadata = "type=$type source=$source $format" }\n\n    fun useVoiceCommunicationSource()')
+    # Upstream 0.2.22 records the actual source and its fallback itself.
+    if '    fun useSource(source: Int)' not in (base/'MicrophoneCaptureStats.kt').read_text():
+        replace(base/'MicrophoneUplink.kt', '        val bufferSize = maxOf(minBuffer * 2, config.frameBytes * 4)',
+            '''        stats.useSourceName(when (source) {
+                MediaRecorder.AudioSource.VOICE_RECOGNITION -> "VOICE_RECOGNITION"
+                MediaRecorder.AudioSource.VOICE_COMMUNICATION -> "VOICE_COMMUNICATION"
+                MediaRecorder.AudioSource.MIC -> "MIC"
+                else -> "DEFAULT"
+            })
+            val bufferSize = maxOf(minBuffer * 2, config.frameBytes * 4)''')
+        replace(base/'MicrophoneCaptureStats.kt', '    fun useVoiceCommunicationSource()',
+            '    fun useSourceName(source: String) { metadata = "type=$type source=$source $format" }\n\n    fun useVoiceCommunicationSource()')
     replace(base/'AndroidMediaSink.kt', '                    speakerphoneCall = speakerphoneCall,',
         '                    speakerphoneCall = speakerphoneCall,\n                    telephonySourceOverride = C11MicrophoneProfile.source(appContext),')
     java=target/'common/src/main/java/com/shilapi/xcertplay'

@@ -18,8 +18,8 @@ class C11UpdatesTest {
         val json = """[
         {"tag_name":"bridge-v0.1.2","assets":[{"name":"bridge.apk","browser_download_url":"wrong"},{"name":"SHA256SUMS.txt","browser_download_url":"wrong"}]},
         {"tag_name":"c11-upstream-v0.2.21-bridge-0.1.2","assets":[{"name":"original.apk","browser_download_url":"wrong"}]},
-        {"tag_name":"c11-v0.2.21-c11.1","assets":[{"name":"DiPlay-C11-0.2.21-c11.1.apk","browser_download_url":"right"},{"name":"SHA256SUMS.txt","browser_download_url":"sum"}]}
+        {"tag_name":"c11-v0.2.21-c11.1","assets":[{"name":"DiPlay-C11-0.2.21-c11.1.apk","browser_download_url":"https://github.com/meiti789789/DiPlay-C11/releases/download/c11-v0.2.21-c11.1/DiPlay-C11-0.2.21-c11.1.apk"},{"name":"SHA256SUMS.txt","browser_download_url":"https://github.com/meiti789789/DiPlay-C11/releases/download/c11-v0.2.21-c11.1/SHA256SUMS.txt"}]}
         ]"""
-        assertEquals("right", UpdateCatalog.parse(json)?.apkUrl)
+        assertEquals("https://github.com/meiti789789/DiPlay-C11/releases/download/c11-v0.2.21-c11.1/DiPlay-C11-0.2.21-c11.1.apk", UpdateCatalog.parse(json)?.apkUrl)
     }
 }
